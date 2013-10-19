@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo " > DHCPD STOP"
+systemctl stop dhcpd4
+
+echo " > WLAN DOWN"
+ifconfig wlan0 down
+echo " > WLAN SETUP"
+ifconfig wlan0 10.0.0.1 netmask 255.255.255.0
+iwconfig wlan0 mode ad-hoc
+iwconfig wlan0 essid "Roboter CAN"
+echo " > WLAN UP"
+ifconfig wlan0 up
+
+echo " > DHCPD START"
+sleep 0.5
+systemctl start dhcpd4

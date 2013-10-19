@@ -1,0 +1,22 @@
+#!/bin/bash
+
+currentDir=$(pwd)
+
+# Change to build directory
+cd /usr/share/nginx/html
+
+# Update build counter
+counter=`cat ./build`
+command="expr $counter + 1"
+echo "BUILD: "`$command`
+echo `$command` > ./build
+
+# Setting up global variables
+./configure
+
+# Compile handler
+gcc -D_REENTRANT ./bin/handler.c -Wall -o ./bin/can-handler -std=c99 -D _BSD_SOURCE -lwiringPi -lm -ljpeg
+
+# Change back to working directory
+cd $currentDir
+
