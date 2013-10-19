@@ -12,52 +12,6 @@ void execCommands(int commandId, char *commandParam)
 		case 0:
 		{
 			imageRecognition();
-			/*time_t current = time(NULL);
-			int seconds = (int)current;
-			int count = 0;
-			while(seconds)
-			{
-				seconds /= 10;
-				count++;
-			}
-			char *commandTemp = malloc((70 + 13 + count + 4) * sizeof(char));
-			sprintf(commandTemp,"/opt/vc/bin/raspistill -w 640 -h 480 -n -t 0 -o /usr/share/nginx/html/sensor-images/%i.jpg",(int)current);
-			if(DEBUG)
-				printf("Capturing the picture...");
-			system(commandTemp);
-			if(DEBUG)
-				printf(" done.\n");
-			free(commandTemp);
-			int thresholdMax = 0;
-			int thresholdMin = 0;
-			int clipping = 0;
-			sscanf(commandParam,"%i %i %i",&thresholdMin,&thresholdMax,&clipping);
-			if(fileExists("/usr/share/nginx/html/bin/imageRecognitionValues/thresholdMin") && fileExists("/usr/share/nginx/html/bin/imageRecognitionValues/thresholdMax") && fileExists("/usr/share/nginx/html/bin/imageRecognitionValues/clipping"))
-			{
-				FILE *imageRecognitionValue;
-				imageRecognitionValue = fopen("/usr/share/nginx/html/bin/imageRecognitionValues/thresholdMin","w");
-				fprintf(imageRecognitionValue,"%i",thresholdMin);
-				fclose(imageRecognitionValue);
-				imageRecognitionValue = fopen("/usr/share/nginx/html/bin/imageRecognitionValues/thresholdMax","w");
-				fprintf(imageRecognitionValue,"%i",thresholdMax);
-				fclose(imageRecognitionValue);
-				imageRecognitionValue = fopen("/usr/share/nginx/html/bin/imageRecognitionValues/clipping","w");
-				fprintf(imageRecognitionValue,"%i",clipping);
-				fclose(imageRecognitionValue);
-			}
-			if(DEBUG == 1)
-			{
-				commandTemp = malloc((79 + count + 4) * sizeof(char));
-				sprintf(commandTemp,"php -f /usr/share/nginx/html/bin/imageRecognition.php /usr/share/nginx/html/sensor-images/%i.jpg d",(int)current);
-			}
-			else
-			{
-				commandTemp = malloc((77 + count + 4) * sizeof(char));
-				sprintf(commandTemp,"php -f /usr/share/nginx/html/bin/imageRecognition.php /usr/share/nginx/html/sensor-images/%i.jpg",(int)current);
-			}
-			if(DEBUG)
-				printf("Processing the image... ");
-			system(commandTemp);*/
 			break;
 		}
 		//  test data bus: send and read an amount of bytes through the data bus,

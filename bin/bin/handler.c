@@ -3,9 +3,6 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
-//#include <linux/stat.h>  // fifo streams
-//#include <pthread.h>     // threads
-//#include <png.h>         // png
 #include <time.h>        // sensor image filename
 #include <math.h>        // sensor image filename
 #include <wiringPi.h>    // wiringPi
