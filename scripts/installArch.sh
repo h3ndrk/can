@@ -560,7 +560,7 @@ chmod 0755 /etc/systemd/system/robotercan.service
 systemctl enable robotercan.service
 
 # INSTALL WEBSERVER
-pacman -S nginx php-fpm php-gd
+pacman -S nginx php-fpm --noconfirm
 
 # CONFIGURE NGINX
 echo '
