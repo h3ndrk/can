@@ -266,7 +266,7 @@ void execCommands(int commandId, char *commandParam)
 			driveToAngle(angle);
 			break;
 		}
-		//  get adc-value of given channel via command parameters
+		//  get adc-value of given channel via command parameters <channel:number>
 		case 13:
 		{
 			char channel = 0;
