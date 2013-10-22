@@ -15,9 +15,15 @@
   16               	drive:
   17               	.LFB7:
   18               		.file 1 "././motor.h"
-   1:././motor.h   **** void drive(uint32_t steps, char leftDir, char rightDir) // leftDir[0=reverse,1=forward], rightDir[0
-   2:././motor.h   **** {
-  19               		.loc 1 2 0
+   1:././motor.h   **** /**
+   2:././motor.h   ****  * Drive an amount of steps with the stepper motors
+   3:././motor.h   ****  * @param steps			amount of steps(1000 steps = 1 rotation)
+   4:././motor.h   ****  * @param leftDir		direction of left motor: 0 = reverse, 1 = forward
+   5:././motor.h   ****  * @param rightDir		direction of right motor: 0 = reverse, 1 = forward
+   6:././motor.h   **** **/
+   7:././motor.h   **** void drive(uint32_t steps, char leftDir, char rightDir)
+   8:././motor.h   **** {
+  19               		.loc 1 8 0
   20               	.LVL0:
   21 0000 2F92      		push r2
   22               	.LCFI0:
@@ -61,38 +67,41 @@
   60               	.L__stack_usage = 18
   61 0024 6B01      		movw r12,r22
   62 0026 7C01      		movw r14,r24
-   3:././motor.h   **** 	if(leftDir == 0)
-  63               		.loc 1 3 0
+   9:././motor.h   **** 	// set direction outputs
+  10:././motor.h   **** 	if(leftDir == 0)
+  63               		.loc 1 10 0
   64 0028 4111      		cpse r20,__zero_reg__
   65 002a 00C0      		rjmp .L2
-   4:././motor.h   **** 		PORTD &= ~(1<<MOTOR_DIR_LEFT);
-  66               		.loc 1 4 0
+  11:././motor.h   **** 		MOTOR_PORT &= ~(1<<MOTOR_DIR_LEFT);
+  66               		.loc 1 11 0
   67 002c 9198      		cbi 0x12,1
   68 002e 00C0      		rjmp .L3
   69               	.L2:
-   5:././motor.h   **** 	else
-   6:././motor.h   **** 		PORTD |= (1<<MOTOR_DIR_LEFT);
-  70               		.loc 1 6 0
+  12:././motor.h   **** 	else
+  13:././motor.h   **** 		MOTOR_PORT |= (1<<MOTOR_DIR_LEFT);
+  70               		.loc 1 13 0
   71 0030 919A      		sbi 0x12,1
   72               	.L3:
-   7:././motor.h   **** 	
-   8:././motor.h   **** 	if(rightDir == 0)
-  73               		.loc 1 8 0
+  14:././motor.h   **** 	
+  15:././motor.h   **** 	if(rightDir == 0)
+  73               		.loc 1 15 0
   74 0032 2111      		cpse r18,__zero_reg__
   75 0034 00C0      		rjmp .L4
-   9:././motor.h   **** 		PORTD |= (1<<MOTOR_DIR_RIGHT);
-  76               		.loc 1 9 0
+  16:././motor.h   **** 		MOTOR_PORT |= (1<<MOTOR_DIR_RIGHT);
+  76               		.loc 1 16 0
   77 0036 929A      		sbi 0x12,2
   78 0038 00C0      		rjmp .L5
   79               	.L4:
-  10:././motor.h   **** 	else
-  11:././motor.h   **** 		PORTD &= ~(1<<MOTOR_DIR_RIGHT);
-  80               		.loc 1 11 0
+  17:././motor.h   **** 	else
+  18:././motor.h   **** 		MOTOR_PORT &= ~(1<<MOTOR_DIR_RIGHT);
+  80               		.loc 1 18 0
   81 003a 9298      		cbi 0x12,2
   82               	.L5:
-  12:././motor.h   **** 	
-  13:././motor.h   **** 	if(steps <= 3000)
-  83               		.loc 1 13 0
+  19:././motor.h   **** 	
+  20:././motor.h   **** 	// if steps <= 3000 then no constant speed between speed ramp else speed
+  21:././motor.h   **** 	// ramp with constant speed between the ramp
+  22:././motor.h   **** 	if(steps <= 3000)
+  83               		.loc 1 22 0
   84 003c 89EB      		ldi r24,-71
   85 003e C816      		cp r12,r24
   86 0040 8BE0      		ldi r24,11
@@ -101,40 +110,41 @@
   89 0046 F104      		cpc r15,__zero_reg__
   90 0048 00F0      		brlo .+2
   91 004a 00C0      		rjmp .L33
-  92               	.LBB57:
-  14:././motor.h   **** 	{
-  15:././motor.h   **** 		for(int i = 1; i <= (steps / 2); i+=1)
-  93               		.loc 1 15 0
+  92               	.LBB58:
+  23:././motor.h   **** 	{
+  24:././motor.h   **** 		// speed ramp accelerate
+  25:././motor.h   **** 		for(int i = 1; i <= (steps / 2); i+=1)
+  93               		.loc 1 25 0
   94 004c F694      		lsr r15
   95 004e E794      		ror r14
   96 0050 D794      		ror r13
   97 0052 C794      		ror r12
   98 0054 01E0      		ldi r16,lo8(1)
   99 0056 10E0      		ldi r17,0
- 100               	.LBB58:
-  16:././motor.h   **** 		{
-  17:././motor.h   **** 			PORTD |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
-  18:././motor.h   **** 			for(int j = 0; j < 1000*(sqrt(i+1)-sqrt(i)); j++)
- 101               		.loc 1 18 0
+ 100               	.LBB59:
+  26:././motor.h   **** 		{
+  27:././motor.h   **** 			MOTOR_PORT |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
+  28:././motor.h   **** 			for(int j = 0; j < 1000*(sqrt(i+1)-sqrt(i)); j++)
+ 101               		.loc 1 28 0
  102 0058 A12C      		mov r10,__zero_reg__
  103 005a B12C      		mov r11,__zero_reg__
  104 005c 00C0      		rjmp .L47
  105               	.LVL1:
  106               	.L13:
- 107               	.LBE58:
-  17:././motor.h   **** 			PORTD |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
- 108               		.loc 1 17 0
+ 107               	.LBE59:
+  27:././motor.h   **** 			MOTOR_PORT |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
+ 108               		.loc 1 27 0
  109 005e 82B3      		in r24,0x12
  110 0060 8861      		ori r24,lo8(24)
  111 0062 82BB      		out 0x12,r24
  112               	.LVL2:
-   1:././motor.h   **** void drive(uint32_t steps, char leftDir, char rightDir) // leftDir[0=reverse,1=forward], rightDir[0
- 113               		.loc 1 1 0
+   7:././motor.h   **** void drive(uint32_t steps, char leftDir, char rightDir)
+ 113               		.loc 1 7 0
  114 0064 0F5F      		subi r16,-1
  115 0066 1F4F      		sbci r17,-1
  116               	.LVL3:
- 117               	.LBB61:
- 118               		.loc 1 18 0
+ 117               	.LBB62:
+ 118               		.loc 1 28 0
  119 0068 B801      		movw r22,r16
  120 006a 8827      		clr r24
  121 006c 77FD      		sbrc r23,7
@@ -180,8 +190,8 @@
  161 00ae 00C0      		rjmp .L8
  162               	.LVL11:
  163               	.L9:
- 164               	.LBB59:
- 165               	.LBB60:
+ 164               	.LBB60:
+ 165               	.LBB61:
  166               		.file 2 "/usr/lib/gcc/avr/4.7.2/../../../avr/include/util/delay.h"
    1:/usr/lib/gcc/avr/4.7.2/../../../avr/include/util/delay.h **** /* Copyright (c) 2002, Marek Michalkiewicz
    2:/usr/lib/gcc/avr/4.7.2/../../../avr/include/util/delay.h ****    Copyright (c) 2004,2005,2007 Joerg Wunsch
@@ -434,13 +444,13 @@
  169 00b2 9A95      		1: dec r25
  170 00b4 01F4      		brne 1b
  171 00b6 0000      		nop
- 172               	.LBE60:
- 173               	.LBE59:
- 174               		.loc 1 18 0
+ 172               	.LBE61:
+ 173               	.LBE60:
+ 174               		.loc 1 28 0
  175 00b8 2196      		adiw r28,1
  176               	.LVL12:
  177               	.L8:
- 178               		.loc 1 18 0 is_stmt 0 discriminator 1
+ 178               		.loc 1 28 0 is_stmt 0 discriminator 1
  179 00ba BE01      		movw r22,r28
  180 00bc 8827      		clr r24
  181 00be 77FD      		sbrc r23,7
@@ -456,17 +466,17 @@
  191               	.LVL14:
  192 00d0 8823      		tst r24
  193 00d2 04F0      		brlt .L9
- 194               	.LBE61:
-  19:././motor.h   **** 				_delay_us(1);
-  20:././motor.h   **** 			PORTD &= ~((1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT));
- 195               		.loc 1 20 0 is_stmt 1
+ 194               	.LBE62:
+  29:././motor.h   **** 				_delay_us(1);
+  30:././motor.h   **** 			MOTOR_PORT &= ~((1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT));
+ 195               		.loc 1 30 0 is_stmt 1
  196 00d4 82B3      		in r24,0x12
  197 00d6 877E      		andi r24,lo8(-25)
  198 00d8 82BB      		out 0x12,r24
  199               	.LVL15:
- 200               	.LBB62:
-  21:././motor.h   **** 			for(int j = 0; j < 1000*(sqrt(i+1)-sqrt(i)); j++)
- 201               		.loc 1 21 0
+ 200               	.LBB63:
+  31:././motor.h   **** 			for(int j = 0; j < 1000*(sqrt(i+1)-sqrt(i)); j++)
+ 201               		.loc 1 31 0
  202 00da 20E0      		ldi r18,0
  203 00dc 30E0      		ldi r19,0
  204 00de A901      		movw r20,r18
@@ -481,16 +491,16 @@
  213 00ee E501      		movw r28,r10
  214               	.LVL17:
  215               	.L12:
- 216               	.LBB63:
- 217               	.LBB64:
+ 216               	.LBB64:
+ 217               	.LBB65:
  218               		.loc 2 246 0
  219 00f0 85E0      		ldi r24,lo8(5)
  220 00f2 8A95      		1: dec r24
  221 00f4 01F4      		brne 1b
  222 00f6 0000      		nop
- 223               	.LBE64:
- 224               	.LBE63:
- 225               		.loc 1 21 0
+ 223               	.LBE65:
+ 224               	.LBE64:
+ 225               		.loc 1 31 0
  226 00f8 2196      		adiw r28,1
  227               	.LVL18:
  228 00fa BE01      		movw r22,r28
@@ -514,9 +524,9 @@
  246               	.L47:
  247 0118 E801      		movw r28,r16
  248               	.LVL22:
- 249               	.LBE62:
-  15:././motor.h   **** 		for(int i = 1; i <= (steps / 2); i+=1)
- 250               		.loc 1 15 0 discriminator 1
+ 249               	.LBE63:
+  25:././motor.h   **** 		for(int i = 1; i <= (steps / 2); i+=1)
+ 250               		.loc 1 25 0 discriminator 1
  251 011a C801      		movw r24,r16
  252 011c AA27      		clr r26
  253 011e 97FD      		sbrc r25,7
@@ -529,39 +539,40 @@
  260 012c 00F0      		brlo .+2
  261 012e 00C0      		rjmp .L13
  262               	.LVL23:
- 263               	.LBE57:
- 264               	.LBB65:
-  22:././motor.h   **** 				_delay_us(1);
-  23:././motor.h   **** 		}
-  24:././motor.h   **** 		for(int i = (steps / 2); i >= 1; i-=1)
- 265               		.loc 1 24 0
+ 263               	.LBE58:
+ 264               	.LBB66:
+  32:././motor.h   **** 				_delay_us(1);
+  33:././motor.h   **** 		}
+  34:././motor.h   **** 		// speed ramp brake
+  35:././motor.h   **** 		for(int i = (steps / 2); i >= 1; i-=1)
+ 265               		.loc 1 35 0
  266 0130 1C14      		cp __zero_reg__,r12
  267 0132 1D04      		cpc __zero_reg__,r13
  268 0134 04F0      		brlt .+2
  269 0136 00C0      		rjmp .L1
- 270               	.LBB66:
-  25:././motor.h   **** 		{
-  26:././motor.h   **** 			PORTD |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
-  27:././motor.h   **** 			for(int j = 0; j < 1000*(sqrt(i+1)-sqrt(i)); j++)
- 271               		.loc 1 27 0
+ 270               	.LBB67:
+  36:././motor.h   **** 		{
+  37:././motor.h   **** 			MOTOR_PORT |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
+  38:././motor.h   **** 			for(int j = 0; j < 1000*(sqrt(i+1)-sqrt(i)); j++)
+ 271               		.loc 1 38 0
  272 0138 00E0      		ldi r16,0
  273 013a 10E0      		ldi r17,0
  274               	.LVL24:
  275               	.L38:
- 276               	.LBE66:
-  26:././motor.h   **** 			PORTD |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
- 277               		.loc 1 26 0
+ 276               	.LBE67:
+  37:././motor.h   **** 			MOTOR_PORT |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
+ 277               		.loc 1 37 0
  278 013c 82B3      		in r24,0x12
  279 013e 8861      		ori r24,lo8(24)
  280 0140 82BB      		out 0x12,r24
  281               	.LVL25:
- 282               	.LBB69:
-   1:././motor.h   **** void drive(uint32_t steps, char leftDir, char rightDir) // leftDir[0=reverse,1=forward], rightDir[0
- 283               		.loc 1 1 0
+ 282               	.LBB70:
+   7:././motor.h   **** void drive(uint32_t steps, char leftDir, char rightDir)
+ 283               		.loc 1 7 0
  284 0142 B601      		movw r22,r12
  285 0144 6F5F      		subi r22,-1
  286 0146 7F4F      		sbci r23,-1
- 287               		.loc 1 27 0
+ 287               		.loc 1 38 0
  288 0148 8827      		clr r24
  289 014a 77FD      		sbrc r23,7
  290 014c 8095      		com r24
@@ -605,20 +616,20 @@
  328 018c 00C0      		rjmp .L15
  329               	.LVL32:
  330               	.L16:
- 331               	.LBB67:
- 332               	.LBB68:
+ 331               	.LBB68:
+ 332               	.LBB69:
  333               		.loc 2 246 0
  334 018e 95E0      		ldi r25,lo8(5)
  335 0190 9A95      		1: dec r25
  336 0192 01F4      		brne 1b
  337 0194 0000      		nop
- 338               	.LBE68:
- 339               	.LBE67:
- 340               		.loc 1 27 0
+ 338               	.LBE69:
+ 339               	.LBE68:
+ 340               		.loc 1 38 0
  341 0196 2196      		adiw r28,1
  342               	.LVL33:
  343               	.L15:
- 344               		.loc 1 27 0 is_stmt 0 discriminator 1
+ 344               		.loc 1 38 0 is_stmt 0 discriminator 1
  345 0198 BE01      		movw r22,r28
  346 019a 8827      		clr r24
  347 019c 77FD      		sbrc r23,7
@@ -634,17 +645,17 @@
  357               	.LVL35:
  358 01ae 8823      		tst r24
  359 01b0 04F0      		brlt .L16
- 360               	.LBE69:
-  28:././motor.h   **** 				_delay_us(1);
-  29:././motor.h   **** 			PORTD &= ~((1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT));
- 361               		.loc 1 29 0 is_stmt 1
+ 360               	.LBE70:
+  39:././motor.h   **** 				_delay_us(1);
+  40:././motor.h   **** 			MOTOR_PORT &= ~((1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT));
+ 361               		.loc 1 40 0 is_stmt 1
  362 01b2 82B3      		in r24,0x12
  363 01b4 877E      		andi r24,lo8(-25)
  364 01b6 82BB      		out 0x12,r24
  365               	.LVL36:
- 366               	.LBB70:
-  30:././motor.h   **** 			for(int j = 0; j < 1000*(sqrt(i+1)-sqrt(i)); j++)
- 367               		.loc 1 30 0
+ 366               	.LBB71:
+  41:././motor.h   **** 			for(int j = 0; j < 1000*(sqrt(i+1)-sqrt(i)); j++)
+ 367               		.loc 1 41 0
  368 01b8 20E0      		ldi r18,0
  369 01ba 30E0      		ldi r19,0
  370 01bc A901      		movw r20,r18
@@ -659,16 +670,16 @@
  379 01cc E801      		movw r28,r16
  380               	.LVL38:
  381               	.L19:
- 382               	.LBB71:
- 383               	.LBB72:
+ 382               	.LBB72:
+ 383               	.LBB73:
  384               		.loc 2 246 0
  385 01ce 85E0      		ldi r24,lo8(5)
  386 01d0 8A95      		1: dec r24
  387 01d2 01F4      		brne 1b
  388 01d4 0000      		nop
- 389               	.LBE72:
- 390               	.LBE71:
- 391               		.loc 1 30 0
+ 389               	.LBE73:
+ 390               	.LBE72:
+ 391               		.loc 1 41 0
  392 01d6 2196      		adiw r28,1
  393               	.LVL39:
  394 01d8 BE01      		movw r22,r28
@@ -690,9 +701,9 @@
  410 01f4 04F0      		brlt .L19
  411               	.LVL42:
  412               	.L17:
- 413               	.LBE70:
-  24:././motor.h   **** 		for(int i = (steps / 2); i >= 1; i-=1)
- 414               		.loc 1 24 0
+ 413               	.LBE71:
+  35:././motor.h   **** 		for(int i = (steps / 2); i >= 1; i-=1)
+ 414               		.loc 1 35 0
  415 01f6 91E0      		ldi r25,1
  416 01f8 C91A      		sub r12,r25
  417 01fa D108      		sbc r13,__zero_reg__
@@ -702,36 +713,37 @@
  421 0200 00C0      		rjmp .L1
  422               	.LVL44:
  423               	.L33:
- 424               	.LBE65:
-  13:././motor.h   **** 	if(steps <= 3000)
- 425               		.loc 1 13 0
+ 424               	.LBE66:
+  22:././motor.h   **** 	if(steps <= 3000)
+ 425               		.loc 1 22 0
  426 0202 02E0      		ldi r16,lo8(2)
  427 0204 10E0      		ldi r17,0
- 428               	.LBB73:
- 429               	.LBB74:
-  31:././motor.h   **** 				_delay_us(1);
-  32:././motor.h   **** 		}
-  33:././motor.h   **** 	}
-  34:././motor.h   **** 	else
-  35:././motor.h   **** 	{
-  36:././motor.h   **** 		for(int i = 1; i <= 1500; i+=1)
-  37:././motor.h   **** 		{
-  38:././motor.h   **** 			PORTD |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
-  39:././motor.h   **** 			for(int j = 0; j < 1000*(sqrt(i+1)-sqrt(i)); j++)
- 430               		.loc 1 39 0
+ 428               	.LBB74:
+ 429               	.LBB75:
+  42:././motor.h   **** 				_delay_us(1);
+  43:././motor.h   **** 		}
+  44:././motor.h   **** 	}
+  45:././motor.h   **** 	else
+  46:././motor.h   **** 	{
+  47:././motor.h   **** 		// speed ramp accelerate
+  48:././motor.h   **** 		for(int i = 1; i <= 1500; i+=1)
+  49:././motor.h   **** 		{
+  50:././motor.h   **** 			MOTOR_PORT |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
+  51:././motor.h   **** 			for(int j = 0; j < 1000*(sqrt(i+1)-sqrt(i)); j++)
+ 430               		.loc 1 51 0
  431 0206 A12C      		mov r10,__zero_reg__
  432 0208 B12C      		mov r11,__zero_reg__
  433               	.LVL45:
  434               	.L6:
- 435               	.LBE74:
-  38:././motor.h   **** 			PORTD |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
- 436               		.loc 1 38 0
+ 435               	.LBE75:
+  50:././motor.h   **** 			MOTOR_PORT |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
+ 436               		.loc 1 50 0
  437 020a 82B3      		in r24,0x12
  438 020c 8861      		ori r24,lo8(24)
  439 020e 82BB      		out 0x12,r24
  440               	.LVL46:
- 441               	.LBB77:
- 442               		.loc 1 39 0
+ 441               	.LBB78:
+ 442               		.loc 1 51 0
  443 0210 B801      		movw r22,r16
  444 0212 8827      		clr r24
  445 0214 77FD      		sbrc r23,7
@@ -743,12 +755,12 @@
  451               	.LVL48:
  452 021e 2B01      		movw r4,r22
  453 0220 3C01      		movw r6,r24
-   1:././motor.h   **** void drive(uint32_t steps, char leftDir, char rightDir) // leftDir[0=reverse,1=forward], rightDir[0
- 454               		.loc 1 1 0
+   7:././motor.h   **** void drive(uint32_t steps, char leftDir, char rightDir)
+ 454               		.loc 1 7 0
  455 0222 B801      		movw r22,r16
  456 0224 6150      		subi r22,1
  457 0226 7109      		sbc r23,__zero_reg__
- 458               		.loc 1 39 0
+ 458               		.loc 1 51 0
  459 0228 8827      		clr r24
  460 022a 77FD      		sbrc r23,7
  461 022c 8095      		com r24
@@ -781,20 +793,20 @@
  488 025a 00C0      		rjmp .L21
  489               	.LVL53:
  490               	.L22:
- 491               	.LBB75:
- 492               	.LBB76:
+ 491               	.LBB76:
+ 492               	.LBB77:
  493               		.loc 2 246 0
  494 025c 85E0      		ldi r24,lo8(5)
  495 025e 8A95      		1: dec r24
  496 0260 01F4      		brne 1b
  497 0262 0000      		nop
- 498               	.LBE76:
- 499               	.LBE75:
- 500               		.loc 1 39 0
+ 498               	.LBE77:
+ 499               	.LBE76:
+ 500               		.loc 1 51 0
  501 0264 2196      		adiw r28,1
  502               	.LVL54:
  503               	.L21:
- 504               		.loc 1 39 0 is_stmt 0 discriminator 1
+ 504               		.loc 1 51 0 is_stmt 0 discriminator 1
  505 0266 BE01      		movw r22,r28
  506 0268 8827      		clr r24
  507 026a 77FD      		sbrc r23,7
@@ -810,17 +822,17 @@
  517               	.LVL56:
  518 027c 8823      		tst r24
  519 027e 04F0      		brlt .L22
- 520               	.LBE77:
-  40:././motor.h   **** 				_delay_us(1);
-  41:././motor.h   **** 			PORTD &= ~((1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT));
- 521               		.loc 1 41 0 is_stmt 1
+ 520               	.LBE78:
+  52:././motor.h   **** 				_delay_us(1);
+  53:././motor.h   **** 			MOTOR_PORT &= ~((1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT));
+ 521               		.loc 1 53 0 is_stmt 1
  522 0280 82B3      		in r24,0x12
  523 0282 877E      		andi r24,lo8(-25)
  524 0284 82BB      		out 0x12,r24
  525               	.LVL57:
- 526               	.LBB78:
-  42:././motor.h   **** 			for(int j = 0; j < 1000*(sqrt(i+1)-sqrt(i)); j++)
- 527               		.loc 1 42 0
+ 526               	.LBB79:
+  54:././motor.h   **** 			for(int j = 0; j < 1000*(sqrt(i+1)-sqrt(i)); j++)
+ 527               		.loc 1 54 0
  528 0286 20E0      		ldi r18,0
  529 0288 30E0      		ldi r19,0
  530 028a A901      		movw r20,r18
@@ -835,16 +847,16 @@
  539 029a E501      		movw r28,r10
  540               	.LVL59:
  541               	.L25:
- 542               	.LBB79:
- 543               	.LBB80:
+ 542               	.LBB80:
+ 543               	.LBB81:
  544               		.loc 2 246 0
  545 029c 95E0      		ldi r25,lo8(5)
  546 029e 9A95      		1: dec r25
  547 02a0 01F4      		brne 1b
  548 02a2 0000      		nop
- 549               	.LBE80:
- 550               	.LBE79:
- 551               		.loc 1 42 0
+ 549               	.LBE81:
+ 550               	.LBE80:
+ 551               		.loc 1 54 0
  552 02a4 2196      		adiw r28,1
  553               	.LVL60:
  554 02a6 BE01      		movw r22,r28
@@ -869,21 +881,22 @@
  573 02c4 0F5F      		subi r16,-1
  574 02c6 1F4F      		sbci r17,-1
  575               	.LVL64:
- 576               	.LBE78:
-  36:././motor.h   **** 		for(int i = 1; i <= 1500; i+=1)
- 577               		.loc 1 36 0
+ 576               	.LBE79:
+  48:././motor.h   **** 		for(int i = 1; i <= 1500; i+=1)
+ 577               		.loc 1 48 0
  578 02c8 0E3D      		cpi r16,-34
  579 02ca 85E0      		ldi r24,5
  580 02cc 1807      		cpc r17,r24
  581 02ce 01F0      		breq .+2
  582 02d0 00C0      		rjmp .L6
  583               	.LVL65:
- 584               	.LBE73:
- 585               	.LBB81:
-  43:././motor.h   **** 				_delay_us(1);
-  44:././motor.h   **** 		}
-  45:././motor.h   **** 		for(int i = 0; i <= (steps - 3000); i+=1)
- 586               		.loc 1 45 0 discriminator 1
+ 584               	.LBE74:
+ 585               	.LBB82:
+  55:././motor.h   **** 				_delay_us(1);
+  56:././motor.h   **** 		}
+  57:././motor.h   **** 		// constant speed
+  58:././motor.h   **** 		for(int i = 0; i <= (steps - 3000); i+=1)
+ 586               		.loc 1 58 0 discriminator 1
  587 02d2 98EB      		ldi r25,-72
  588 02d4 C91A      		sub r12,r25
  589 02d6 9BE0      		ldi r25,11
@@ -895,15 +908,15 @@
  595 02e0 30E0      		ldi r19,0
  596               	.LVL67:
  597               	.L26:
-  46:././motor.h   **** 		{
-  47:././motor.h   **** 			PORTD |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
- 598               		.loc 1 47 0 discriminator 2
+  59:././motor.h   **** 		{
+  60:././motor.h   **** 			MOTOR_PORT |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
+ 598               		.loc 1 60 0 discriminator 2
  599 02e2 82B3      		in r24,0x12
  600 02e4 8861      		ori r24,lo8(24)
  601 02e6 82BB      		out 0x12,r24
  602               	.LVL68:
- 603               	.LBB82:
- 604               	.LBB83:
+ 603               	.LBB83:
+ 604               	.LBB84:
  605               		.loc 2 246 0 discriminator 2
  606 02e8 8FE7      		ldi r24,lo8(639)
  607 02ea 92E0      		ldi r25,hi8(639)
@@ -911,17 +924,17 @@
  609 02ee 01F4      		brne 1b
  610 02f0 00C0      		rjmp .
  611 02f2 0000      		nop
- 612               	.LBE83:
- 613               	.LBE82:
-  48:././motor.h   **** 			_delay_us(160);
-  49:././motor.h   **** 			PORTD &= ~((1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT));
- 614               		.loc 1 49 0 discriminator 2
+ 612               	.LBE84:
+ 613               	.LBE83:
+  61:././motor.h   **** 			_delay_us(160);
+  62:././motor.h   **** 			MOTOR_PORT &= ~((1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT));
+ 614               		.loc 1 62 0 discriminator 2
  615 02f4 82B3      		in r24,0x12
  616 02f6 877E      		andi r24,lo8(-25)
  617 02f8 82BB      		out 0x12,r24
  618               	.LVL69:
- 619               	.LBB84:
- 620               	.LBB85:
+ 619               	.LBB85:
+ 620               	.LBB86:
  621               		.loc 2 246 0 discriminator 2
  622 02fa 8FE7      		ldi r24,lo8(639)
  623 02fc 92E0      		ldi r25,hi8(639)
@@ -929,10 +942,10 @@
  625 0300 01F4      		brne 1b
  626 0302 00C0      		rjmp .
  627 0304 0000      		nop
- 628               	.LBE85:
- 629               	.LBE84:
-  45:././motor.h   **** 		for(int i = 0; i <= (steps - 3000); i+=1)
- 630               		.loc 1 45 0 discriminator 2
+ 628               	.LBE86:
+ 629               	.LBE85:
+  58:././motor.h   **** 		for(int i = 0; i <= (steps - 3000); i+=1)
+ 630               		.loc 1 58 0 discriminator 2
  631 0306 2F5F      		subi r18,-1
  632 0308 3F4F      		sbci r19,-1
  633               	.LVL70:
@@ -946,39 +959,40 @@
  641 0318 EA06      		cpc r14,r26
  642 031a FB06      		cpc r15,r27
  643 031c 00F4      		brsh .L26
-  45:././motor.h   **** 		for(int i = 0; i <= (steps - 3000); i+=1)
- 644               		.loc 1 45 0 is_stmt 0
+  58:././motor.h   **** 		for(int i = 0; i <= (steps - 3000); i+=1)
+ 644               		.loc 1 58 0 is_stmt 0
  645 031e 0CED      		ldi r16,lo8(-36)
  646 0320 15E0      		ldi r17,lo8(5)
  647               	.LVL71:
- 648               	.LBE81:
- 649               	.LBB86:
- 650               	.LBB87:
-  50:././motor.h   **** 			_delay_us(160);
-  51:././motor.h   **** 		}
-  52:././motor.h   **** 		for(int i = 1500; i >= 1; i-=1)
-  53:././motor.h   **** 		{
-  54:././motor.h   **** 			PORTD |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
-  55:././motor.h   **** 			for(int j = 0; j < 1000*(sqrt(i+1)-sqrt(i)); j++)
- 651               		.loc 1 55 0 is_stmt 1
+ 648               	.LBE82:
+ 649               	.LBB87:
+ 650               	.LBB88:
+  63:././motor.h   **** 			_delay_us(160);
+  64:././motor.h   **** 		}
+  65:././motor.h   **** 		// speed ramp brake
+  66:././motor.h   **** 		for(int i = 1500; i >= 1; i-=1)
+  67:././motor.h   **** 		{
+  68:././motor.h   **** 			MOTOR_PORT |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
+  69:././motor.h   **** 			for(int j = 0; j < 1000*(sqrt(i+1)-sqrt(i)); j++)
+ 651               		.loc 1 69 0 is_stmt 1
  652 0322 E12C      		mov r14,__zero_reg__
  653 0324 F12C      		mov r15,__zero_reg__
  654               	.LVL72:
  655               	.L32:
- 656               	.LBE87:
-  54:././motor.h   **** 			PORTD |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
- 657               		.loc 1 54 0
+ 656               	.LBE88:
+  68:././motor.h   **** 			MOTOR_PORT |= (1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT);
+ 657               		.loc 1 68 0
  658 0326 82B3      		in r24,0x12
  659 0328 8861      		ori r24,lo8(24)
  660 032a 82BB      		out 0x12,r24
  661               	.LVL73:
- 662               	.LBB90:
-   1:././motor.h   **** void drive(uint32_t steps, char leftDir, char rightDir) // leftDir[0=reverse,1=forward], rightDir[0
- 663               		.loc 1 1 0
+ 662               	.LBB91:
+   7:././motor.h   **** void drive(uint32_t steps, char leftDir, char rightDir)
+ 663               		.loc 1 7 0
  664 032c B801      		movw r22,r16
  665 032e 6F5F      		subi r22,-1
  666 0330 7F4F      		sbci r23,-1
- 667               		.loc 1 55 0
+ 667               		.loc 1 69 0
  668 0332 8827      		clr r24
  669 0334 77FD      		sbrc r23,7
  670 0336 8095      		com r24
@@ -1022,20 +1036,20 @@
  708 0376 00C0      		rjmp .L27
  709               	.LVL80:
  710               	.L28:
- 711               	.LBB88:
- 712               	.LBB89:
+ 711               	.LBB89:
+ 712               	.LBB90:
  713               		.loc 2 246 0
  714 0378 95E0      		ldi r25,lo8(5)
  715 037a 9A95      		1: dec r25
  716 037c 01F4      		brne 1b
  717 037e 0000      		nop
- 718               	.LBE89:
- 719               	.LBE88:
- 720               		.loc 1 55 0
+ 718               	.LBE90:
+ 719               	.LBE89:
+ 720               		.loc 1 69 0
  721 0380 2196      		adiw r28,1
  722               	.LVL81:
  723               	.L27:
- 724               		.loc 1 55 0 is_stmt 0 discriminator 1
+ 724               		.loc 1 69 0 is_stmt 0 discriminator 1
  725 0382 BE01      		movw r22,r28
  726 0384 8827      		clr r24
  727 0386 77FD      		sbrc r23,7
@@ -1051,17 +1065,17 @@
  737               	.LVL83:
  738 0398 8823      		tst r24
  739 039a 04F0      		brlt .L28
- 740               	.LBE90:
-  56:././motor.h   **** 				_delay_us(1);
-  57:././motor.h   **** 			PORTD &= ~((1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT));
- 741               		.loc 1 57 0 is_stmt 1
+ 740               	.LBE91:
+  70:././motor.h   **** 				_delay_us(1);
+  71:././motor.h   **** 			MOTOR_PORT &= ~((1<<MOTOR_CLOCK_LEFT) | (1<<MOTOR_CLOCK_RIGHT));
+ 741               		.loc 1 71 0 is_stmt 1
  742 039c 82B3      		in r24,0x12
  743 039e 877E      		andi r24,lo8(-25)
  744 03a0 82BB      		out 0x12,r24
  745               	.LVL84:
- 746               	.LBB91:
-  58:././motor.h   **** 			for(int j = 0; j < 1000*(sqrt(i+1)-sqrt(i)); j++)
- 747               		.loc 1 58 0
+ 746               	.LBB92:
+  72:././motor.h   **** 			for(int j = 0; j < 1000*(sqrt(i+1)-sqrt(i)); j++)
+ 747               		.loc 1 72 0
  748 03a2 20E0      		ldi r18,0
  749 03a4 30E0      		ldi r19,0
  750 03a6 A901      		movw r20,r18
@@ -1076,16 +1090,16 @@
  759 03b6 E701      		movw r28,r14
  760               	.LVL86:
  761               	.L31:
- 762               	.LBB92:
- 763               	.LBB93:
+ 762               	.LBB93:
+ 763               	.LBB94:
  764               		.loc 2 246 0
  765 03b8 85E0      		ldi r24,lo8(5)
  766 03ba 8A95      		1: dec r24
  767 03bc 01F4      		brne 1b
  768 03be 0000      		nop
- 769               	.LBE93:
- 770               	.LBE92:
- 771               		.loc 1 58 0
+ 769               	.LBE94:
+ 770               	.LBE93:
+ 771               		.loc 1 72 0
  772 03c0 2196      		adiw r28,1
  773               	.LVL87:
  774 03c2 BE01      		movw r22,r28
@@ -1107,9 +1121,9 @@
  790 03de 04F0      		brlt .L31
  791               	.LVL90:
  792               	.L29:
- 793               	.LBE91:
-  52:././motor.h   **** 		for(int i = 1500; i >= 1; i-=1)
- 794               		.loc 1 52 0
+ 793               	.LBE92:
+  66:././motor.h   **** 		for(int i = 1500; i >= 1; i-=1)
+ 794               		.loc 1 66 0
  795 03e0 0150      		subi r16,1
  796 03e2 1109      		sbc r17,__zero_reg__
  797               	.LVL91:
@@ -1118,12 +1132,12 @@
  800               	.LVL92:
  801               	.L1:
  802               	/* epilogue start */
- 803               	.LBE86:
-  59:././motor.h   **** 				_delay_us(1);
-  60:././motor.h   **** 		}
-  61:././motor.h   **** 	}
-  62:././motor.h   **** }
- 804               		.loc 1 62 0
+ 803               	.LBE87:
+  73:././motor.h   **** 				_delay_us(1);
+  74:././motor.h   **** 		}
+  75:././motor.h   **** 	}
+  76:././motor.h   **** }
+ 804               		.loc 1 76 0
  805 03e8 DF91      		pop r29
  806 03ea CF91      		pop r28
  807 03ec 1F91      		pop r17
@@ -1148,42 +1162,47 @@
  828               	usart_putChar:
  829               	.LFB8:
  830               		.file 3 "././usart.h"
-   1:././usart.h   **** int usart_putChar(char c,FILE *stream)
-   2:././usart.h   **** {
- 831               		.loc 3 2 0
+   1:././usart.h   **** /********************************************\
+   2:././usart.h   **** * !!!!! THIS FILE IS NOT USED ANY MORE !!!!! *
+   3:././usart.h   **** *         NO GUARANTEE FOR ERRORS            *
+   4:././usart.h   **** \********************************************/
+   5:././usart.h   **** 
+   6:././usart.h   **** int usart_putChar(char c,FILE *stream)
+   7:././usart.h   **** {
+ 831               		.loc 3 7 0
  832               	.LVL93:
  833               	/* prologue: function */
  834               	/* frame size = 0 */
  835               	/* stack size = 0 */
  836               	.L__stack_usage = 0
-   3:././usart.h   **** 	/* NEW LINE CHARACTER */
-   4:././usart.h   **** 	if(c == '\n')
- 837               		.loc 3 4 0
+   8:././usart.h   **** 	/* NEW LINE CHARACTER */
+   9:././usart.h   **** 	if(c == '\n')
+ 837               		.loc 3 9 0
  838 040e 8A30      		cpi r24,lo8(10)
  839 0410 01F4      		brne .L52
  840               	.L53:
-   5:././usart.h   **** 	{
-   6:././usart.h   **** 		while(!(UCSRA & (1 << UDRE)));
- 841               		.loc 3 6 0 discriminator 1
+  10:././usart.h   **** 	{
+  11:././usart.h   **** 		while(!(UCSRA & (1 << UDRE)));
+ 841               		.loc 3 11 0 discriminator 1
  842 0412 5D9B      		sbis 0xb,5
  843 0414 00C0      		rjmp .L53
-   7:././usart.h   **** 		UDR = '\r';
- 844               		.loc 3 7 0
+  12:././usart.h   **** 		UDR = '\r';
+ 844               		.loc 3 12 0
  845 0416 9DE0      		ldi r25,lo8(13)
  846 0418 9CB9      		out 0xc,r25
  847               	.L52:
-   8:././usart.h   **** 	}
-   9:././usart.h   **** 	/* CHARACTER */
-  10:././usart.h   **** 	while(!(UCSRA & (1 << UDRE)));
- 848               		.loc 3 10 0 discriminator 1
+  13:././usart.h   **** 	}
+  14:././usart.h   **** 	/* CHARACTER */
+  15:././usart.h   **** 	while(!(UCSRA & (1 << UDRE)));
+ 848               		.loc 3 15 0 discriminator 1
  849 041a 5D9B      		sbis 0xb,5
  850 041c 00C0      		rjmp .L52
-  11:././usart.h   **** 	UDR = c;
- 851               		.loc 3 11 0
+  16:././usart.h   **** 	UDR = c;
+ 851               		.loc 3 16 0
  852 041e 8CB9      		out 0xc,r24
-  12:././usart.h   **** 	return 0;
-  13:././usart.h   **** }
- 853               		.loc 3 13 0
+  17:././usart.h   **** 	return 0;
+  18:././usart.h   **** }
+ 853               		.loc 3 18 0
  854 0420 80E0      		ldi r24,0
  855 0422 90E0      		ldi r25,0
  856               	.LVL94:
@@ -1192,75 +1211,75 @@
  860               	.global	usart_getChar
  862               	usart_getChar:
  863               	.LFB9:
-  14:././usart.h   **** 
-  15:././usart.h   **** int usart_getChar(FILE *stream)
-  16:././usart.h   **** {
- 864               		.loc 3 16 0
+  19:././usart.h   **** 
+  20:././usart.h   **** int usart_getChar(FILE *stream)
+  21:././usart.h   **** {
+ 864               		.loc 3 21 0
  865               	/* prologue: function */
  866               	/* frame size = 0 */
  867               	/* stack size = 0 */
  868               	.L__stack_usage = 0
  869               	.LVL95:
  870               	.L57:
-  17:././usart.h   **** 	while(!(UCSRA & (1 << RXC)));
- 871               		.loc 3 17 0 discriminator 1
+  22:././usart.h   **** 	while(!(UCSRA & (1 << RXC)));
+ 871               		.loc 3 22 0 discriminator 1
  872 0426 5F9B      		sbis 0xb,7
  873 0428 00C0      		rjmp .L57
-  18:././usart.h   **** 	return (int)UDR;
- 874               		.loc 3 18 0
+  23:././usart.h   **** 	return (int)UDR;
+ 874               		.loc 3 23 0
  875 042a 8CB1      		in r24,0xc
  876               	.LVL96:
-  19:././usart.h   **** }
- 877               		.loc 3 19 0
+  24:././usart.h   **** }
+ 877               		.loc 3 24 0
  878 042c 90E0      		ldi r25,0
  879 042e 0895      		ret
  880               	.LFE9:
  882               	.global	usart_init
  884               	usart_init:
  885               	.LFB10:
-  20:././usart.h   **** 
-  21:././usart.h   **** #define BAUDRATE 2400UL
-  22:././usart.h   **** 
-  23:././usart.h   **** void usart_init(void)
-  24:././usart.h   **** {
- 886               		.loc 3 24 0
+  25:././usart.h   **** 
+  26:././usart.h   **** #define BAUDRATE 2400UL
+  27:././usart.h   **** 
+  28:././usart.h   **** void usart_init(void)
+  29:././usart.h   **** {
+ 886               		.loc 3 29 0
  887               	/* prologue: function */
  888               	/* frame size = 0 */
  889               	/* stack size = 0 */
  890               	.L__stack_usage = 0
  891               	.LVL97:
-  25:././usart.h   **** 	uint16_t ubrr = (uint16_t)((uint32_t)F_CPU / (16 * BAUDRATE) - 1);
-  26:././usart.h   ****     UBRRH = (uint8_t)(ubrr>>8);
- 892               		.loc 3 26 0
+  30:././usart.h   **** 	uint16_t ubrr = (uint16_t)((uint32_t)F_CPU / (16 * BAUDRATE) - 1);
+  31:././usart.h   ****     UBRRH = (uint8_t)(ubrr>>8);
+ 892               		.loc 3 31 0
  893 0430 81E0      		ldi r24,lo8(1)
  894 0432 80BD      		out 0x20,r24
-  27:././usart.h   ****     UBRRL = (uint8_t)(ubrr);
- 895               		.loc 3 27 0
+  32:././usart.h   ****     UBRRL = (uint8_t)(ubrr);
+ 895               		.loc 3 32 0
  896 0434 8FE9      		ldi r24,lo8(-97)
  897 0436 89B9      		out 0x9,r24
-  28:././usart.h   ****     
-  29:././usart.h   **** 	// enable receiver and trasmitter
-  30:././usart.h   **** 	UCSRB = (1<<RXEN) | (1<<TXEN);
- 898               		.loc 3 30 0
+  33:././usart.h   ****     
+  34:././usart.h   **** 	// enable receiver and trasmitter
+  35:././usart.h   **** 	UCSRB = (1<<RXEN) | (1<<TXEN);
+ 898               		.loc 3 35 0
  899 0438 88E1      		ldi r24,lo8(24)
  900 043a 8AB9      		out 0xa,r24
-  31:././usart.h   **** 	// set frame format: 1stop bit, 8data
-  32:././usart.h   **** 	UCSRC = (1<<URSEL) | (1<<UCSZ1) | (1<<UCSZ0);
- 901               		.loc 3 32 0
+  36:././usart.h   **** 	// set frame format: 1stop bit, 8data
+  37:././usart.h   **** 	UCSRC = (1<<URSEL) | (1<<UCSZ1) | (1<<UCSZ0);
+ 901               		.loc 3 37 0
  902 043c 86E8      		ldi r24,lo8(-122)
  903 043e 80BD      		out 0x20,r24
-  33:././usart.h   **** 	
-  34:././usart.h   **** 	while(UCSRA & (1 << RXC))
- 904               		.loc 3 34 0
+  38:././usart.h   **** 	
+  39:././usart.h   **** 	while(UCSRA & (1 << RXC))
+ 904               		.loc 3 39 0
  905 0440 5F9B      		sbis 0xb,7
  906 0442 00C0      		rjmp .L59
  907               	.L62:
-  35:././usart.h   **** 	{
-  36:././usart.h   **** 		UDR;
- 908               		.loc 3 36 0
+  40:././usart.h   **** 	{
+  41:././usart.h   **** 		UDR;
+ 908               		.loc 3 41 0
  909 0444 8CB1      		in r24,0xc
-  34:././usart.h   **** 	while(UCSRA & (1 << RXC))
- 910               		.loc 3 34 0
+  39:././usart.h   **** 	while(UCSRA & (1 << RXC))
+ 910               		.loc 3 39 0
  911 0446 5F99      		sbic 0xb,7
  912 0448 00C0      		rjmp .L62
  913               	.L59:
@@ -1270,85 +1289,53 @@
  919               	dataBusRead:
  920               	.LFB11:
  921               		.file 4 "././communication.h"
-   1:././communication.h **** /*void blink(void)
-   2:././communication.h **** {
-   3:././communication.h **** 	PORTC |= (1<<5);
-   4:././communication.h **** 	_delay_ms(1000);
-   5:././communication.h **** 	PORTC &= ~(1<<5);
-   6:././communication.h **** }*/
-   7:././communication.h **** 
-   8:././communication.h **** /*void usart_handleCommand(int commandId, char *commandParam)
-   9:././communication.h **** {
-  10:././communication.h **** 	//blink();
-  11:././communication.h **** 	
-  12:././communication.h **** 	int tempInputSize = 0;
-  13:././communication.h **** 	char *tempInput;
-  14:././communication.h **** 	char tempCharacter = 0;
-  15:././communication.h **** 	
-  16:././communication.h **** 	while(1)
-  17:././communication.h **** 	{
-  18:././communication.h **** 		while(!(UCSRA & (1 << RXC)));
-  19:././communication.h **** 		tempCharacter = UDR;
-  20:././communication.h **** 		if(tempInputSize == 0)
-  21:././communication.h **** 		{
-  22:././communication.h **** 			tempInput = malloc(0);
-  23:././communication.h **** 		}
-  24:././communication.h **** 		if(tempCharacter != ":")
-  25:././communication.h **** 		tempInputSize += 1;
-  26:././communication.h **** 		tempInput = realloc(tempInput,tempInputSize * sizeof(char));
-  27:././communication.h **** 		tempInput[tempInputSize - 1] = tempCharacter;
-  28:././communication.h **** 	}
-  29:././communication.h **** 	
-  30:././communication.h **** 	switch(commandId)
-  31:././communication.h **** 	{
-  32:././communication.h **** 		case 0:
-  33:././communication.h **** 			printf("%i:%i:%i",100,150,200);
-  34:././communication.h **** 			break;
-  35:././communication.h **** 	}
-  36:././communication.h **** }*/
-  37:././communication.h **** 
-  38:././communication.h **** char dataBusRead(void)
-  39:././communication.h **** {
- 922               		.loc 4 39 0
+   1:././communication.h **** /**
+   2:././communication.h ****  * Read a byte from data bus
+   3:././communication.h ****  * @return the byte read from data bus
+   4:././communication.h **** **/
+   5:././communication.h **** char dataBusRead(void)
+   6:././communication.h **** {
+ 922               		.loc 4 6 0
  923               	/* prologue: function */
  924               	/* frame size = 0 */
  925               	/* stack size = 0 */
  926               	.L__stack_usage = 0
  927               	.LVL98:
-  40:././communication.h **** 	char byte = 0;
-  41:././communication.h **** 	for(int i = 0; i < 8; i++)
- 928               		.loc 4 41 0
+   7:././communication.h **** 	char byte = 0;
+   8:././communication.h **** 	for(int i = 0; i < 8; i++)
+ 928               		.loc 4 8 0
  929 044c 20E0      		ldi r18,0
  930 044e 30E0      		ldi r19,0
-  40:././communication.h **** 	char byte = 0;
- 931               		.loc 4 40 0
+   7:././communication.h **** 	char byte = 0;
+ 931               		.loc 4 7 0
  932 0450 80E0      		ldi r24,0
- 933               	.LBB94:
-  42:././communication.h **** 	{
-  43:././communication.h **** 		/* WAIT FOR CLOCK */
-  44:././communication.h **** 		while(bit_is_clear(PINB,4));
-  45:././communication.h **** 		if(bit_is_set(PINB,0))
-  46:././communication.h **** 		{
-  47:././communication.h **** 			byte |= (1<<i);
-  48:././communication.h **** 		}
-  49:././communication.h **** 		else
-  50:././communication.h **** 		{
-  51:././communication.h **** 			byte &= ~(1<<i);
- 934               		.loc 4 51 0
+ 933               	.LBB95:
+   9:././communication.h **** 	{
+  10:././communication.h **** 		// wait for clock
+  11:././communication.h **** 		while(bit_is_clear(PINB,4));
+  12:././communication.h **** 		// save bit
+  13:././communication.h **** 		if(bit_is_set(PINB,0))
+  14:././communication.h **** 		{
+  15:././communication.h **** 			byte |= (1<<i);
+  16:././communication.h **** 		}
+  17:././communication.h **** 		else
+  18:././communication.h **** 		{
+  19:././communication.h **** 			byte &= ~(1<<i);
+ 934               		.loc 4 19 0
  935 0452 41E0      		ldi r20,lo8(1)
  936 0454 50E0      		ldi r21,0
  937               	.LVL99:
  938               	.L74:
-  44:././communication.h **** 		while(bit_is_clear(PINB,4));
- 939               		.loc 4 44 0 discriminator 1
+  11:././communication.h **** 		while(bit_is_clear(PINB,4));
+ 939               		.loc 4 11 0 discriminator 1
  940 0456 B49B      		sbis 0x16,4
  941 0458 00C0      		rjmp .L74
-  45:././communication.h **** 		if(bit_is_set(PINB,0))
- 942               		.loc 4 45 0
+  13:././communication.h **** 		if(bit_is_set(PINB,0))
+ 942               		.loc 4 13 0
  943 045a B09B      		sbis 0x16,0
  944 045c 00C0      		rjmp .L66
-  47:././communication.h **** 			byte |= (1<<i);
- 945               		.loc 4 47 0
+  15:././communication.h **** 			byte |= (1<<i);
+ 945               		.loc 4 15 0
  946 045e BA01      		movw r22,r20
  947 0460 022E      		mov r0,r18
  948 0462 00C0      		rjmp 2f
@@ -1363,7 +1350,7 @@
  957 046e 00C0      		rjmp .L71
  958               	.LVL101:
  959               	.L66:
- 960               		.loc 4 51 0
+ 960               		.loc 4 19 0
  961 0470 BA01      		movw r22,r20
  962 0472 022E      		mov r0,r18
  963 0474 00C0      		rjmp 2f
@@ -1377,14 +1364,14 @@
  971 0480 8623      		and r24,r22
  972               	.LVL102:
  973               	.L71:
-  52:././communication.h **** 		}
-  53:././communication.h **** 		/* WAIT FOR CLOCK */
-  54:././communication.h **** 		while(bit_is_set(PINB,4));
- 974               		.loc 4 54 0 discriminator 1
+  20:././communication.h **** 		}
+  21:././communication.h **** 		// wait for clock
+  22:././communication.h **** 		while(bit_is_set(PINB,4));
+ 974               		.loc 4 22 0 discriminator 1
  975 0482 B499      		sbic 0x16,4
  976 0484 00C0      		rjmp .L71
-  41:././communication.h **** 	for(int i = 0; i < 8; i++)
- 977               		.loc 4 41 0
+   8:././communication.h **** 	for(int i = 0; i < 8; i++)
+ 977               		.loc 4 8 0
  978 0486 2F5F      		subi r18,-1
  979 0488 3F4F      		sbci r19,-1
  980               	.LVL103:
@@ -1392,27 +1379,31 @@
  982 048c 3105      		cpc r19,__zero_reg__
  983 048e 01F4      		brne .L74
  984               	/* epilogue start */
- 985               	.LBE94:
-  55:././communication.h **** 	}
-  56:././communication.h **** 	return byte;
-  57:././communication.h **** }
- 986               		.loc 4 57 0
+ 985               	.LBE95:
+  23:././communication.h **** 	}
+  24:././communication.h **** 	return byte;
+  25:././communication.h **** }
+ 986               		.loc 4 25 0
  987 0490 0895      		ret
  988               	.LFE11:
  990               	.global	dataBusSend
  992               	dataBusSend:
  993               	.LFB12:
-  58:././communication.h **** 
-  59:././communication.h **** void dataBusSend(char byte)
-  60:././communication.h **** {
- 994               		.loc 4 60 0
+  26:././communication.h **** 
+  27:././communication.h **** /**
+  28:././communication.h ****  * Send a byte to data bus
+  29:././communication.h ****  * @param byte			the byte to be sended
+  30:././communication.h **** **/
+  31:././communication.h **** void dataBusSend(char byte)
+  32:././communication.h **** {
+ 994               		.loc 4 32 0
  995               	.LVL104:
  996               	/* prologue: function */
  997               	/* frame size = 0 */
  998               	/* stack size = 0 */
  999               	.L__stack_usage = 0
- 1000               	.LBB95:
- 1001               	.LBB96:
+ 1000               	.LBB96:
+ 1001               	.LBB97:
  164:/usr/lib/gcc/avr/4.7.2/../../../avr/include/util/delay.h **** 	__builtin_avr_delay_cycles(__ticks_dc);
  1002               		.loc 2 164 0
  1003 0492 EFE1      		ldi r30,lo8(19999)
@@ -1422,17 +1413,18 @@
  1007 049a 00C0      		rjmp .
  1008 049c 0000      		nop
  1009               	.LVL105:
-  61:././communication.h **** 	_delay_ms(5);
-  62:././communication.h **** 	for(int i = 0; i < 8; i++)
- 1010               		.loc 4 62 0
+  33:././communication.h **** 	_delay_ms(5);
+  34:././communication.h **** 	for(int i = 0; i < 8; i++)
+ 1010               		.loc 4 34 0
  1011 049e 20E0      		ldi r18,0
  1012 04a0 30E0      		ldi r19,0
- 1013               	.LBE96:
- 1014               	.LBE95:
- 1015               	.LBB97:
-  63:././communication.h **** 	{
-  64:././communication.h **** 		if(byte & (1<<i))
- 1016               		.loc 4 64 0
+ 1013               	.LBE97:
+ 1014               	.LBE96:
+ 1015               	.LBB98:
+  35:././communication.h **** 	{
+  36:././communication.h **** 		// set output
+  37:././communication.h **** 		if(byte & (1<<i))
+ 1016               		.loc 4 37 0
  1017 04a2 90E0      		ldi r25,0
  1018               	.LVL106:
  1019               	.L78:
@@ -1447,27 +1439,27 @@
  1028 04b0 02F4      		brpl 1b
  1029 04b2 40FF      		sbrs r20,0
  1030 04b4 00C0      		rjmp .L76
-  65:././communication.h **** 		{
-  66:././communication.h **** 			PORTB |= (1<<2);
- 1031               		.loc 4 66 0
+  38:././communication.h **** 		{
+  39:././communication.h **** 			PORTB |= (1<<2);
+ 1031               		.loc 4 39 0
  1032 04b6 C29A      		sbi 0x18,2
  1033 04b8 00C0      		rjmp .L77
  1034               	.L76:
-  67:././communication.h **** 		}
-  68:././communication.h **** 		else
-  69:././communication.h **** 		{
-  70:././communication.h **** 			PORTB &= ~(1<<2);
- 1035               		.loc 4 70 0
+  40:././communication.h **** 		}
+  41:././communication.h **** 		else
+  42:././communication.h **** 		{
+  43:././communication.h **** 			PORTB &= ~(1<<2);
+ 1035               		.loc 4 43 0
  1036 04ba C298      		cbi 0x18,2
  1037               	.L77:
-  71:././communication.h **** 		}
-  72:././communication.h **** 		/* CLOCK */
-  73:././communication.h **** 		PORTB |= (1<<3);
- 1038               		.loc 4 73 0
+  44:././communication.h **** 		}
+  45:././communication.h **** 		// clock
+  46:././communication.h **** 		PORTB |= (1<<3);
+ 1038               		.loc 4 46 0
  1039 04bc C39A      		sbi 0x18,3
  1040               	.LVL107:
- 1041               	.LBB98:
- 1042               	.LBB99:
+ 1041               	.LBB99:
+ 1042               	.LBB100:
  1043               		.loc 2 246 0
  1044 04be EFEC      		ldi r30,lo8(1999)
  1045 04c0 F7E0      		ldi r31,hi8(1999)
@@ -1475,15 +1467,15 @@
  1047 04c4 01F4      		brne 1b
  1048 04c6 00C0      		rjmp .
  1049 04c8 0000      		nop
- 1050               	.LBE99:
- 1051               	.LBE98:
-  74:././communication.h **** 		_delay_us(500);
-  75:././communication.h **** 		PORTB &= ~(1<<3);
- 1052               		.loc 4 75 0
+ 1050               	.LBE100:
+ 1051               	.LBE99:
+  47:././communication.h **** 		_delay_us(500);
+  48:././communication.h **** 		PORTB &= ~(1<<3);
+ 1052               		.loc 4 48 0
  1053 04ca C398      		cbi 0x18,3
  1054               	.LVL108:
- 1055               	.LBB100:
- 1056               	.LBB101:
+ 1055               	.LBB101:
+ 1056               	.LBB102:
  1057               		.loc 2 246 0
  1058 04cc EFEC      		ldi r30,lo8(1999)
  1059 04ce F7E0      		ldi r31,hi8(1999)
@@ -1491,10 +1483,10 @@
  1061 04d2 01F4      		brne 1b
  1062 04d4 00C0      		rjmp .
  1063 04d6 0000      		nop
- 1064               	.LBE101:
- 1065               	.LBE100:
-  62:././communication.h **** 	for(int i = 0; i < 8; i++)
- 1066               		.loc 4 62 0
+ 1064               	.LBE102:
+ 1065               	.LBE101:
+  34:././communication.h **** 	for(int i = 0; i < 8; i++)
+ 1066               		.loc 4 34 0
  1067 04d8 2F5F      		subi r18,-1
  1068 04da 3F4F      		sbci r19,-1
  1069               	.LVL109:
@@ -1502,11 +1494,11 @@
  1071 04de 3105      		cpc r19,__zero_reg__
  1072 04e0 01F4      		brne .L78
  1073               	/* epilogue start */
- 1074               	.LBE97:
-  76:././communication.h **** 		_delay_us(500);
-  77:././communication.h **** 	}
-  78:././communication.h **** }
- 1075               		.loc 4 78 0
+ 1074               	.LBE98:
+  49:././communication.h **** 		_delay_us(500);
+  50:././communication.h **** 	}
+  51:././communication.h **** }
+ 1075               		.loc 4 51 0
  1076 04e2 0895      		ret
  1077               	.LFE12:
  1079               	.global	__floatunsisf
@@ -1514,10 +1506,15 @@
  1081               	.global	beep
  1083               	beep:
  1084               	.LFB13:
- 1085               		.file 5 "./other.h"
-   1:./other.h     **** void beep(uint32_t frequency,uint32_t duration)
-   2:./other.h     **** {
- 1086               		.loc 5 2 0
+ 1085               		.file 5 "././other.h"
+   1:././other.h   **** /**
+   2:././other.h   ****  * Perform beep with mikrocontroller
+   3:././other.h   ****  * @param frequency		frequency for beep
+   4:././other.h   ****  * @param duration		duration for beep
+   5:././other.h   **** **/
+   6:././other.h   **** void beep(uint32_t frequency,uint32_t duration)
+   7:././other.h   **** {
+ 1086               		.loc 5 7 0
  1087               	.LVL110:
  1088 04e4 4F92      		push r4
  1089               	.LCFI18:
@@ -1560,9 +1557,9 @@
  1126 0508 4901      		movw r8,r18
  1127 050a 5A01      		movw r10,r20
  1128               	.LVL111:
- 1129               	.LBB102:
-   3:./other.h     **** 	for(int i = 0; i < frequency * ((float)duration / 1000.0); i++)
- 1130               		.loc 5 3 0
+ 1129               	.LBB103:
+   8:././other.h   **** 	for(int i = 0; i < frequency * ((float)duration / 1000.0); i++)
+ 1130               		.loc 5 8 0
  1131 050c 00D0      		rcall __floatunsisf
  1132               	.LVL112:
  1133 050e 2B01      		movw r4,r22
@@ -1596,11 +1593,11 @@
  1161 053c 1816      		cp __zero_reg__,r24
  1162 053e 04F0      		brlt .+2
  1163 0540 00C0      		rjmp .L80
- 1164               	.LBB103:
-   4:./other.h     **** 	{
-   5:./other.h     **** 		PORTD |= (1<<5);
-   6:./other.h     **** 		for(int j = 0; j < 220000 / frequency; j++)
- 1165               		.loc 5 6 0
+ 1164               	.LBB104:
+   9:././other.h   **** 	{
+  10:././other.h   **** 		PORTD |= (1<<5);
+  11:././other.h   **** 		for(int j = 0; j < 220000 / frequency; j++)
+ 1165               		.loc 5 11 0
  1166 0542 60E6      		ldi r22,lo8(96)
  1167 0544 7BE5      		ldi r23,lo8(91)
  1168 0546 83E0      		ldi r24,lo8(3)
@@ -1611,22 +1608,22 @@
  1173 0550 6901      		movw r12,r18
  1174 0552 7A01      		movw r14,r20
  1175               	.LVL118:
-   3:./other.h     **** 	for(int i = 0; i < frequency * ((float)duration / 1000.0); i++)
- 1176               		.loc 5 3 0
+   8:././other.h   **** 	for(int i = 0; i < frequency * ((float)duration / 1000.0); i++)
+ 1176               		.loc 5 8 0
  1177 0554 C0E0      		ldi r28,0
  1178 0556 D0E0      		ldi r29,0
- 1179               		.loc 5 6 0
+ 1179               		.loc 5 11 0
  1180 0558 00E0      		ldi r16,0
  1181 055a 10E0      		ldi r17,0
  1182               	.LVL119:
  1183               	.L86:
- 1184               	.LBE103:
-   5:./other.h     **** 		PORTD |= (1<<5);
- 1185               		.loc 5 5 0
+ 1184               	.LBE104:
+  10:././other.h   **** 		PORTD |= (1<<5);
+ 1185               		.loc 5 10 0
  1186 055c 959A      		sbi 0x12,5
  1187               	.LVL120:
- 1188               	.LBB106:
- 1189               		.loc 5 6 0
+ 1188               	.LBB107:
+ 1189               		.loc 5 11 0
  1190 055e C114      		cp r12,__zero_reg__
  1191 0560 D104      		cpc r13,__zero_reg__
  1192 0562 E104      		cpc r14,__zero_reg__
@@ -1635,16 +1632,16 @@
  1195 0568 9801      		movw r18,r16
  1196               	.LVL121:
  1197               	.L84:
- 1198               	.LBB104:
- 1199               	.LBB105:
+ 1198               	.LBB105:
+ 1199               	.LBB106:
  1200               		.loc 2 246 0
  1201 056a 85E0      		ldi r24,lo8(5)
  1202 056c 8A95      		1: dec r24
  1203 056e 01F4      		brne 1b
  1204 0570 0000      		nop
- 1205               	.LBE105:
- 1206               	.LBE104:
- 1207               		.loc 5 6 0
+ 1205               	.LBE106:
+ 1206               	.LBE105:
+ 1207               		.loc 5 11 0
  1208 0572 2F5F      		subi r18,-1
  1209 0574 3F4F      		sbci r19,-1
  1210               	.LVL122:
@@ -1658,28 +1655,28 @@
  1218 0584 AE05      		cpc r26,r14
  1219 0586 BF05      		cpc r27,r15
  1220 0588 00F0      		brlo .L84
- 1221               	.LBE106:
-   7:./other.h     **** 			_delay_us(1);
-   8:./other.h     **** 		PORTD &= ~(1<<5);
- 1222               		.loc 5 8 0
+ 1221               	.LBE107:
+  12:././other.h   **** 			_delay_us(1);
+  13:././other.h   **** 		PORTD &= ~(1<<5);
+ 1222               		.loc 5 13 0
  1223 058a 9598      		cbi 0x12,5
  1224               	.LVL123:
-   9:./other.h     **** 		for(int j = 0; j < 220000 / frequency; j++)
- 1225               		.loc 5 9 0
+  14:././other.h   **** 		for(int j = 0; j < 220000 / frequency; j++)
+ 1225               		.loc 5 14 0
  1226 058c 9801      		movw r18,r16
  1227               	.LVL124:
  1228               	.L85:
- 1229               	.LBB107:
- 1230               	.LBB108:
- 1231               	.LBB109:
+ 1229               	.LBB108:
+ 1230               	.LBB109:
+ 1231               	.LBB110:
  1232               		.loc 2 246 0
  1233 058e 85E0      		ldi r24,lo8(5)
  1234 0590 8A95      		1: dec r24
  1235 0592 01F4      		brne 1b
  1236 0594 0000      		nop
- 1237               	.LBE109:
- 1238               	.LBE108:
- 1239               		.loc 5 9 0
+ 1237               	.LBE110:
+ 1238               	.LBE109:
+ 1239               		.loc 5 14 0
  1240 0596 2F5F      		subi r18,-1
  1241 0598 3F4F      		sbci r19,-1
  1242               	.LVL125:
@@ -1695,9 +1692,9 @@
  1252 05ac 00F0      		brlo .L85
  1253               	.LVL126:
  1254               	.L87:
- 1255               	.LBE107:
-   3:./other.h     **** 	for(int i = 0; i < frequency * ((float)duration / 1000.0); i++)
- 1256               		.loc 5 3 0
+ 1255               	.LBE108:
+   8:././other.h   **** 	for(int i = 0; i < frequency * ((float)duration / 1000.0); i++)
+ 1256               		.loc 5 8 0
  1257 05ae 2196      		adiw r28,1
  1258               	.LVL127:
  1259 05b0 BE01      		movw r22,r28
@@ -1718,19 +1715,19 @@
  1274 05ca 00C0      		rjmp .L80
  1275               	.LVL130:
  1276               	.L83:
-   8:./other.h     **** 		PORTD &= ~(1<<5);
- 1277               		.loc 5 8 0
+  13:././other.h   **** 		PORTD &= ~(1<<5);
+ 1277               		.loc 5 13 0
  1278 05cc 9598      		cbi 0x12,5
  1279               	.LVL131:
  1280 05ce 00C0      		rjmp .L87
  1281               	.LVL132:
  1282               	.L80:
  1283               	/* epilogue start */
- 1284               	.LBE102:
-  10:./other.h     **** 			_delay_us(1);
-  11:./other.h     **** 	}
-  12:./other.h     **** }
- 1285               		.loc 5 12 0
+ 1284               	.LBE103:
+  15:././other.h   **** 			_delay_us(1);
+  16:././other.h   **** 	}
+  17:././other.h   **** }
+ 1285               		.loc 5 17 0
  1286 05d0 DF91      		pop r29
  1287 05d2 CF91      		pop r28
  1288 05d4 1F91      		pop r17
@@ -1749,500 +1746,664 @@
  1301 05ee 4F90      		pop r4
  1302 05f0 0895      		ret
  1303               	.LFE13:
- 1305               	.global	__fixsfsi
- 1306               	.global	main
- 1308               	main:
- 1309               	.LFB14:
- 1310               		.file 6 "main.c"
-   1:main.c        **** #define MOTOR_ENABLE 0
-   2:main.c        **** #define MOTOR_DIR_LEFT 1
-   3:main.c        **** #define MOTOR_DIR_RIGHT 2
-   4:main.c        **** #define MOTOR_CLOCK_LEFT 3
-   5:main.c        **** #define MOTOR_CLOCK_RIGHT 4
-   6:main.c        **** 
-   7:main.c        **** #include "./include.h"
-   8:main.c        **** 
-   9:main.c        **** int main(void)
-  10:main.c        **** {
- 1311               		.loc 6 10 0
- 1312 05f2 CF93      		push r28
- 1313               	.LCFI34:
- 1314 05f4 DF93      		push r29
- 1315               	.LCFI35:
- 1316 05f6 00D0      		rcall .
- 1317               	.LCFI36:
- 1318 05f8 CDB7      		in r28,__SP_L__
- 1319 05fa DEB7      		in r29,__SP_H__
- 1320               	.LCFI37:
- 1321               	/* prologue: function */
- 1322               	/* frame size = 2 */
- 1323               	/* stack size = 4 */
- 1324               	.L__stack_usage = 4
-  11:main.c        **** 	/* DATA BUS INPUT OUTPUT DECLARATION */
-  12:main.c        **** 	DDRB = 0xFF;		// 1	FAN
- 1325               		.loc 6 12 0
- 1326 05fc 8FEF      		ldi r24,lo8(-1)
- 1327 05fe 87BB      		out 0x17,r24
-  13:main.c        **** 						// 2	DATA	A->R
-  14:main.c        **** 						// 3	CLOCK	A->R
-  15:main.c        **** 						// 6	XTAL1
-  16:main.c        **** 						// 7	XTAL2
-  17:main.c        **** 	
-  18:main.c        **** 	DDRB &= ~(1<<0);	// 0	DATA	R->A
- 1328               		.loc 6 18 0
- 1329 0600 B898      		cbi 0x17,0
-  19:main.c        **** 	DDRB &= ~(1<<4);	// 4	CLOCK	R->A
- 1330               		.loc 6 19 0
- 1331 0602 BC98      		cbi 0x17,4
-  20:main.c        **** 	DDRB &= ~(1<<5);	// 5	EXTRA	R->A
- 1332               		.loc 6 20 0
- 1333 0604 BD98      		cbi 0x17,5
-  21:main.c        **** 	
-  22:main.c        **** 	/* MOTOR INPUT OUTPUT DECLARATION */
-  23:main.c        **** 	DDRD = 0xFF;		// 0	ENABLE
- 1334               		.loc 6 23 0
- 1335 0606 81BB      		out 0x11,r24
-  24:main.c        **** 						// 1	DIR		LEFT
-  25:main.c        **** 						// 2	DIR		RIGHT
-  26:main.c        **** 						// 3	CLOCK	LEFT
-  27:main.c        **** 						// 4	CLOCK	RIGHT
-  28:main.c        **** 						// 5	PIEZO
-  29:main.c        **** 						// 6	Not Connected
-  30:main.c        **** 						// 7	Not Connected
-  31:main.c        **** 	
-  32:main.c        **** 	/* ENABLE FAN PWM */
-  33:main.c        **** 	TCCR1A = (1<<COM1A1) | (1<<WGM10) | (1<<WGM11);
- 1336               		.loc 6 33 0
- 1337 0608 83E8      		ldi r24,lo8(-125)
- 1338 060a 8FBD      		out 0x2f,r24
-  34:main.c        **** 	TCCR1B = (1<<WGM12) | (1<<CS12);
- 1339               		.loc 6 34 0
- 1340 060c 8CE0      		ldi r24,lo8(12)
- 1341 060e 8EBD      		out 0x2e,r24
-  35:main.c        **** 	OCR1A = 255;
- 1342               		.loc 6 35 0
- 1343 0610 8FEF      		ldi r24,lo8(-1)
- 1344 0612 90E0      		ldi r25,0
- 1345 0614 9BBD      		out 0x2a+1,r25
- 1346 0616 8ABD      		out 0x2a,r24
-  36:main.c        **** 	
-  37:main.c        **** 	/* DISABLE MOTORS BY DEFAULT */
-  38:main.c        **** 	PORTD |= (1<<MOTOR_ENABLE);
- 1347               		.loc 6 38 0
- 1348 0618 909A      		sbi 0x12,0
-  39:main.c        **** 	
-  40:main.c        **** 	/* INDICATE STARTUP FINISH */
-  41:main.c        **** 	beep(1500,50);
- 1349               		.loc 6 41 0
- 1350 061a 22E3      		ldi r18,lo8(50)
- 1351 061c 30E0      		ldi r19,0
- 1352 061e 40E0      		ldi r20,0
- 1353 0620 50E0      		ldi r21,0
- 1354 0622 6CED      		ldi r22,lo8(-36)
- 1355 0624 75E0      		ldi r23,lo8(5)
- 1356 0626 80E0      		ldi r24,0
- 1357 0628 90E0      		ldi r25,0
- 1358 062a 00D0      		rcall beep
- 1359               	.LVL133:
- 1360               	.LBB110:
-  42:main.c        **** 	
-  43:main.c        **** 	while(1)
-  44:main.c        **** 	{
-  45:main.c        **** 		char byte = dataBusRead();
-  46:main.c        **** 		switch(byte)
- 1361               		.loc 6 46 0
- 1362 062c A12C      		mov r10,__zero_reg__
- 1363 062e B12C      		mov r11,__zero_reg__
- 1364               	.LBB111:
- 1365               	.LBB112:
-  47:main.c        **** 		{
-  48:main.c        **** 			case 1:
-  49:main.c        **** 			{
-  50:main.c        **** 				int failure = 0;
-  51:main.c        **** 				for(int i = 0; i < 100; i++)
- 1366               		.loc 6 51 0
- 1367 0630 00E0      		ldi r16,0
- 1368               	.L110:
- 1369               	.LBE112:
- 1370               	.LBE111:
-  45:main.c        **** 		char byte = dataBusRead();
- 1371               		.loc 6 45 0
- 1372 0632 00D0      		rcall dataBusRead
- 1373               	.LVL134:
-  46:main.c        **** 		switch(byte)
- 1374               		.loc 6 46 0
- 1375 0634 8430      		cpi r24,lo8(4)
- 1376 0636 01F4      		brne .+2
- 1377 0638 00C0      		rjmp .L97
- 1378 063a 00F4      		brsh .L100
- 1379 063c 8130      		cpi r24,lo8(1)
- 1380 063e 01F0      		breq .L106
- 1381 0640 8330      		cpi r24,lo8(3)
- 1382 0642 01F4      		brne .L110
- 1383 0644 00C0      		rjmp .L96
- 1384               	.L100:
- 1385 0646 8530      		cpi r24,lo8(5)
- 1386 0648 01F4      		brne .+2
- 1387 064a 00C0      		rjmp .L98
- 1388 064c 8630      		cpi r24,lo8(6)
- 1389 064e 01F4      		brne .L110
- 1390 0650 00C0      		rjmp .L99
- 1391               	.L106:
- 1392 0652 6501      		movw r12,r10
- 1393 0654 7501      		movw r14,r10
- 1394               	.LVL135:
- 1395               	.L95:
- 1396               	.LBB117:
- 1397               	.LBB113:
-  52:main.c        **** 				{
-  53:main.c        **** 					if(dataBusRead() != i)
- 1398               		.loc 6 53 0
- 1399 0656 00D0      		rcall dataBusRead
- 1400               	.LVL136:
- 1401 0658 90E0      		ldi r25,0
- 1402 065a 8C15      		cp r24,r12
- 1403 065c 9D05      		cpc r25,r13
- 1404 065e 01F0      		breq .L101
-  54:main.c        **** 						failure = 1;
- 1405               		.loc 6 54 0
- 1406 0660 EE24      		clr r14
- 1407 0662 E394      		inc r14
- 1408 0664 F12C      		mov r15,__zero_reg__
- 1409               	.L101:
- 1410               	.LVL137:
-  51:main.c        **** 				for(int i = 0; i < 100; i++)
- 1411               		.loc 6 51 0
- 1412 0666 2FEF      		ldi r18,-1
- 1413 0668 C21A      		sub r12,r18
- 1414 066a D20A      		sbc r13,r18
- 1415               	.LVL138:
- 1416 066c 34E6      		ldi r19,100
- 1417 066e C316      		cp r12,r19
- 1418 0670 D104      		cpc r13,__zero_reg__
- 1419 0672 01F4      		brne .L95
- 1420               	.LVL139:
-  51:main.c        **** 				for(int i = 0; i < 100; i++)
- 1421               		.loc 6 51 0 is_stmt 0 discriminator 1
- 1422 0674 102F      		mov r17,r16
- 1423               	.LVL140:
- 1424               	.L102:
- 1425               	.LBE113:
- 1426               	.LBB114:
-  55:main.c        **** 				}
-  56:main.c        **** 				for(int i = 0; i < 100; i++)
-  57:main.c        **** 				{
-  58:main.c        **** 					dataBusSend(i);
- 1427               		.loc 6 58 0 is_stmt 1 discriminator 2
- 1428 0676 812F      		mov r24,r17
- 1429 0678 00D0      		rcall dataBusSend
- 1430               	.LVL141:
- 1431 067a 1F5F      		subi r17,lo8(-(1))
-  56:main.c        **** 				for(int i = 0; i < 100; i++)
- 1432               		.loc 6 56 0 discriminator 2
- 1433 067c 1436      		cpi r17,lo8(100)
- 1434 067e 01F4      		brne .L102
- 1435               	.LVL142:
- 1436               	.LBE114:
- 1437               	.LBB115:
- 1438               	.LBB116:
- 164:/usr/lib/gcc/avr/4.7.2/../../../avr/include/util/delay.h **** 	__builtin_avr_delay_cycles(__ticks_dc);
- 1439               		.loc 2 164 0
- 1440 0680 8FEF      		ldi r24,lo8(159999)
- 1441 0682 90E7      		ldi r25,hi8(159999)
- 1442 0684 E2E0      		ldi r30,hlo8(159999)
- 1443 0686 8150      		1: subi r24,1
- 1444 0688 9040      		sbci r25,0
- 1445 068a E040      		sbci r30,0
- 1446 068c 01F4      		brne 1b
- 1447 068e 00C0      		rjmp .
- 1448 0690 0000      		nop
- 1449               	.LBE116:
- 1450               	.LBE115:
+ 1305               	.global	adcInit
+ 1307               	adcInit:
+ 1308               	.LFB14:
+ 1309               		.file 6 "././adc.h"
+   1:././adc.h     **** void adcInit(void)
+   2:././adc.h     **** {
+ 1310               		.loc 6 2 0
+ 1311               	/* prologue: function */
+ 1312               	/* frame size = 0 */
+ 1313               	/* stack size = 0 */
+ 1314               	.L__stack_usage = 0
+   3:././adc.h     **** 	uint16_t result;
+   4:././adc.h     **** 	
+   5:././adc.h     **** 	// enable adc
+   6:././adc.h     **** 	ADMUX = (1<<REFS0);					// avcc as reference
+ 1315               		.loc 6 6 0
+ 1316 05f2 80E4      		ldi r24,lo8(64)
+ 1317 05f4 87B9      		out 0x7,r24
+   7:././adc.h     **** 	ADCSRA =  (1<<ADPS2) | (1<<ADPS1);	// prescaler to 64
+ 1318               		.loc 6 7 0
+ 1319 05f6 86E0      		ldi r24,lo8(6)
+ 1320 05f8 86B9      		out 0x6,r24
+   8:././adc.h     **** 	ADCSRA |= (1<<ADEN);				// enable
+ 1321               		.loc 6 8 0
+ 1322 05fa 379A      		sbi 0x6,7
+   9:././adc.h     **** 	
+  10:././adc.h     **** 	// dummy readout
+  11:././adc.h     **** 	ADCSRA |= (1<<ADSC);				// start
+ 1323               		.loc 6 11 0
+ 1324 05fc 369A      		sbi 0x6,6
+ 1325               	.L93:
+  12:././adc.h     **** 	while(ADCSRA & (1<<ADSC));			// wait for value
+ 1326               		.loc 6 12 0 discriminator 1
+ 1327 05fe 3699      		sbic 0x6,6
+ 1328 0600 00C0      		rjmp .L93
+  13:././adc.h     **** 	result = ADCW;						// perform read
+ 1329               		.loc 6 13 0
+ 1330 0602 84B1      		in r24,0x4
+ 1331 0604 95B1      		in r25,0x4+1
+ 1332 0606 0895      		ret
+ 1333               	.LFE14:
+ 1335               	.global	adcRead
+ 1337               	adcRead:
+ 1338               	.LFB15:
+  14:././adc.h     **** }
+  15:././adc.h     **** 
+  16:././adc.h     **** uint16_t adcRead(uint8_t channel)
+  17:././adc.h     **** {
+ 1339               		.loc 6 17 0
+ 1340               	.LVL133:
+ 1341               	/* prologue: function */
+ 1342               	/* frame size = 0 */
+ 1343               	/* stack size = 0 */
+ 1344               	.L__stack_usage = 0
+  18:././adc.h     **** 	uint8_t i;
+  19:././adc.h     **** 	uint32_t result = 0;
+  20:././adc.h     **** 
+  21:././adc.h     **** 	// set channel + set avcc as reference
+  22:././adc.h     **** 	ADMUX = channel | (1<<REFS0);
+ 1345               		.loc 6 22 0
+ 1346 0608 8064      		ori r24,lo8(64)
+ 1347               	.LVL134:
+ 1348 060a 87B9      		out 0x7,r24
+  23:././adc.h     **** 	
+  24:././adc.h     **** 	// dummy readout
+  25:././adc.h     **** 	ADCSRA |= (1<<ADSC);
+ 1349               		.loc 6 25 0
+ 1350 060c 369A      		sbi 0x6,6
+ 1351               	.L96:
+  26:././adc.h     **** 	while(ADCSRA & (1<<ADSC));
+ 1352               		.loc 6 26 0 discriminator 1
+ 1353 060e 3699      		sbic 0x6,6
+ 1354 0610 00C0      		rjmp .L96
+ 1355               		.loc 6 26 0 is_stmt 0
+ 1356 0612 4AE0      		ldi r20,lo8(10)
+ 1357 0614 60E0      		ldi r22,0
+ 1358 0616 70E0      		ldi r23,0
+ 1359 0618 CB01      		movw r24,r22
+ 1360               	.LVL135:
+ 1361               	.L98:
+  27:././adc.h     **** 	
+  28:././adc.h     **** 	// average of 10 times
+  29:././adc.h     **** 	for(i = 0; i < 10; i++)
+  30:././adc.h     **** 	{
+  31:././adc.h     **** 		ADCSRA |= (1<<ADSC);
+ 1362               		.loc 6 31 0 is_stmt 1
+ 1363 061a 369A      		sbi 0x6,6
+ 1364               	.L97:
+  32:././adc.h     **** 		while(ADCSRA & (1<<ADSC));
+ 1365               		.loc 6 32 0 discriminator 1
+ 1366 061c 3699      		sbic 0x6,6
+ 1367 061e 00C0      		rjmp .L97
+  33:././adc.h     **** 		result += ADCW;
+ 1368               		.loc 6 33 0
+ 1369 0620 24B1      		in r18,0x4
+ 1370 0622 35B1      		in r19,0x4+1
+ 1371 0624 620F      		add r22,r18
+ 1372 0626 731F      		adc r23,r19
+ 1373 0628 811D      		adc r24,__zero_reg__
+ 1374 062a 911D      		adc r25,__zero_reg__
+ 1375               	.LVL136:
+ 1376 062c 4150      		subi r20,lo8(-(-1))
+  29:././adc.h     **** 	for(i = 0; i < 10; i++)
+ 1377               		.loc 6 29 0
+ 1378 062e 01F4      		brne .L98
+ 1379               	.LVL137:
+  34:././adc.h     **** 	}
+  35:././adc.h     **** 	
+  36:././adc.h     **** 	// calculate average
+  37:././adc.h     **** 	result /= 100;
+ 1380               		.loc 6 37 0
+ 1381 0630 24E6      		ldi r18,lo8(100)
+ 1382 0632 30E0      		ldi r19,0
+ 1383 0634 40E0      		ldi r20,0
+ 1384 0636 50E0      		ldi r21,0
+ 1385 0638 00D0      		rcall __udivmodsi4
+ 1386               	.LVL138:
+  38:././adc.h     **** 	
+  39:././adc.h     **** 	return result;
+  40:././adc.h     **** }
+ 1387               		.loc 6 40 0
+ 1388 063a 822F      		mov r24,r18
+ 1389 063c 932F      		mov r25,r19
+ 1390 063e 0895      		ret
+ 1391               	.LFE15:
+ 1393               	.global	__fixsfsi
+ 1394               	.global	main
+ 1396               	main:
+ 1397               	.LFB16:
+ 1398               		.file 7 "main.c"
+   1:main.c        **** #define MOTOR_PORT PORTD
+   2:main.c        **** #define MOTOR_ENABLE 0
+   3:main.c        **** #define MOTOR_DIR_LEFT 1
+   4:main.c        **** #define MOTOR_DIR_RIGHT 2
+   5:main.c        **** #define MOTOR_CLOCK_LEFT 3
+   6:main.c        **** #define MOTOR_CLOCK_RIGHT 4
+   7:main.c        **** 
+   8:main.c        **** #include "./include.h"
+   9:main.c        **** 
+  10:main.c        **** int main(void)
+  11:main.c        **** {
+ 1399               		.loc 7 11 0
+ 1400 0640 CF93      		push r28
+ 1401               	.LCFI34:
+ 1402 0642 DF93      		push r29
+ 1403               	.LCFI35:
+ 1404 0644 00D0      		rcall .
+ 1405               	.LCFI36:
+ 1406 0646 CDB7      		in r28,__SP_L__
+ 1407 0648 DEB7      		in r29,__SP_H__
+ 1408               	.LCFI37:
+ 1409               	/* prologue: function */
+ 1410               	/* frame size = 2 */
+ 1411               	/* stack size = 4 */
+ 1412               	.L__stack_usage = 4
+  12:main.c        **** 	// data bus input output declaration
+  13:main.c        **** 	DDRB = 0xFF;		// 1	FAN
+ 1413               		.loc 7 13 0
+ 1414 064a 8FEF      		ldi r24,lo8(-1)
+ 1415 064c 87BB      		out 0x17,r24
+  14:main.c        **** 						// 2	DATA	A->R
+  15:main.c        **** 						// 3	CLOCK	A->R
+  16:main.c        **** 						// 6	XTAL1
+  17:main.c        **** 						// 7	XTAL2
+  18:main.c        **** 	
+  19:main.c        **** 	DDRB &= ~(1<<0);	// 0	DATA	R->A
+ 1416               		.loc 7 19 0
+ 1417 064e B898      		cbi 0x17,0
+  20:main.c        **** 	DDRB &= ~(1<<4);	// 4	CLOCK	R->A
+ 1418               		.loc 7 20 0
+ 1419 0650 BC98      		cbi 0x17,4
+  21:main.c        **** 	DDRB &= ~(1<<5);	// 5	EXTRA	R->A
+ 1420               		.loc 7 21 0
+ 1421 0652 BD98      		cbi 0x17,5
+  22:main.c        **** 	
+  23:main.c        **** 	// motor input output declaration
+  24:main.c        **** 	DDRD = 0xFF;		// 0	ENABLE
+ 1422               		.loc 7 24 0
+ 1423 0654 81BB      		out 0x11,r24
+  25:main.c        **** 						// 1	DIR		LEFT
+  26:main.c        **** 						// 2	DIR		RIGHT
+  27:main.c        **** 						// 3	CLOCK	LEFT
+  28:main.c        **** 						// 4	CLOCK	RIGHT
+  29:main.c        **** 						// 5	PIEZO
+  30:main.c        **** 						// 6	Not Connected
+  31:main.c        **** 						// 7	Not Connected
+  32:main.c        **** 	
+  33:main.c        **** 	// enable fan pwm
+  34:main.c        **** 	TCCR1A = (1<<COM1A1) | (1<<WGM10) | (1<<WGM11);
+ 1424               		.loc 7 34 0
+ 1425 0656 83E8      		ldi r24,lo8(-125)
+ 1426 0658 8FBD      		out 0x2f,r24
+  35:main.c        **** 	TCCR1B = (1<<WGM12) | (1<<CS12);
+ 1427               		.loc 7 35 0
+ 1428 065a 8CE0      		ldi r24,lo8(12)
+ 1429 065c 8EBD      		out 0x2e,r24
+  36:main.c        **** 	OCR1A = 255;
+ 1430               		.loc 7 36 0
+ 1431 065e 8FEF      		ldi r24,lo8(-1)
+ 1432 0660 90E0      		ldi r25,0
+ 1433 0662 9BBD      		out 0x2a+1,r25
+ 1434 0664 8ABD      		out 0x2a,r24
+  37:main.c        **** 	
+  38:main.c        **** 	// disable motors by default
+  39:main.c        **** 	PORTD |= (1<<MOTOR_ENABLE);
+ 1435               		.loc 7 39 0
+ 1436 0666 909A      		sbi 0x12,0
+  40:main.c        **** 	
+  41:main.c        **** 	// indicate startup finish with beep
+  42:main.c        **** 	beep(1500,50);
+ 1437               		.loc 7 42 0
+ 1438 0668 22E3      		ldi r18,lo8(50)
+ 1439 066a 30E0      		ldi r19,0
+ 1440 066c 40E0      		ldi r20,0
+ 1441 066e 50E0      		ldi r21,0
+ 1442 0670 6CED      		ldi r22,lo8(-36)
+ 1443 0672 75E0      		ldi r23,lo8(5)
+ 1444 0674 80E0      		ldi r24,0
+ 1445 0676 90E0      		ldi r25,0
+ 1446 0678 00D0      		rcall beep
+ 1447               	.LVL139:
+  43:main.c        **** 	
+  44:main.c        **** 	// initialize adc
+  45:main.c        **** 	adcInit();
+ 1448               		.loc 7 45 0
+ 1449 067a 00D0      		rcall adcInit
+ 1450               	.LVL140:
+ 1451               	.LBB111:
+  46:main.c        **** 	
+  47:main.c        **** 	while(1)
+  48:main.c        **** 	{
+  49:main.c        **** 		char byte = dataBusRead();
+  50:main.c        **** 		switch(byte)
+ 1452               		.loc 7 50 0
+ 1453 067c A12C      		mov r10,__zero_reg__
+ 1454 067e B12C      		mov r11,__zero_reg__
+ 1455               	.LBB112:
+ 1456               	.LBB113:
+  51:main.c        **** 		{
+  52:main.c        **** 			case 1:
+  53:main.c        **** 			{
+  54:main.c        **** 				int failure = 0;
+  55:main.c        **** 				for(int i = 0; i < 100; i++)
+ 1457               		.loc 7 55 0
+ 1458 0680 00E0      		ldi r16,0
+ 1459               	.L121:
+ 1460               	.LBE113:
+ 1461               	.LBE112:
+  49:main.c        **** 		char byte = dataBusRead();
+ 1462               		.loc 7 49 0
+ 1463 0682 00D0      		rcall dataBusRead
+ 1464               	.LVL141:
+  50:main.c        **** 		switch(byte)
+ 1465               		.loc 7 50 0
+ 1466 0684 8430      		cpi r24,lo8(4)
+ 1467 0686 01F4      		brne .+2
+ 1468 0688 00C0      		rjmp .L107
+ 1469 068a 00F4      		brsh .L111
+ 1470 068c 8130      		cpi r24,lo8(1)
+ 1471 068e 01F0      		breq .L117
+ 1472 0690 8330      		cpi r24,lo8(3)
+ 1473 0692 01F4      		brne .L121
+ 1474 0694 00C0      		rjmp .L106
+ 1475               	.L111:
+ 1476 0696 8630      		cpi r24,lo8(6)
+ 1477 0698 01F4      		brne .+2
+ 1478 069a 00C0      		rjmp .L109
+ 1479 069c 00F4      		brsh .+2
+ 1480 069e 00C0      		rjmp .L108
+ 1481 06a0 8D30      		cpi r24,lo8(13)
+ 1482 06a2 01F4      		brne .L121
+ 1483 06a4 00C0      		rjmp .L110
+ 1484               	.L117:
+ 1485 06a6 6501      		movw r12,r10
+ 1486 06a8 7501      		movw r14,r10
+ 1487               	.LVL142:
+ 1488               	.L105:
+ 1489               	.LBB118:
+ 1490               	.LBB114:
+  56:main.c        **** 				{
+  57:main.c        **** 					if(dataBusRead() != i)
+ 1491               		.loc 7 57 0
+ 1492 06aa 00D0      		rcall dataBusRead
+ 1493               	.LVL143:
+ 1494 06ac 90E0      		ldi r25,0
+ 1495 06ae 8C15      		cp r24,r12
+ 1496 06b0 9D05      		cpc r25,r13
+ 1497 06b2 01F0      		breq .L112
+  58:main.c        **** 						failure = 1;
+ 1498               		.loc 7 58 0
+ 1499 06b4 EE24      		clr r14
+ 1500 06b6 E394      		inc r14
+ 1501 06b8 F12C      		mov r15,__zero_reg__
+ 1502               	.L112:
+ 1503               	.LVL144:
+  55:main.c        **** 				for(int i = 0; i < 100; i++)
+ 1504               		.loc 7 55 0
+ 1505 06ba 2FEF      		ldi r18,-1
+ 1506 06bc C21A      		sub r12,r18
+ 1507 06be D20A      		sbc r13,r18
+ 1508               	.LVL145:
+ 1509 06c0 34E6      		ldi r19,100
+ 1510 06c2 C316      		cp r12,r19
+ 1511 06c4 D104      		cpc r13,__zero_reg__
+ 1512 06c6 01F4      		brne .L105
+ 1513               	.LVL146:
+  55:main.c        **** 				for(int i = 0; i < 100; i++)
+ 1514               		.loc 7 55 0 is_stmt 0 discriminator 1
+ 1515 06c8 102F      		mov r17,r16
+ 1516               	.LVL147:
+ 1517               	.L113:
+ 1518               	.LBE114:
+ 1519               	.LBB115:
   59:main.c        **** 				}
-  60:main.c        **** 				_delay_ms(50);
-  61:main.c        **** 				if(failure == 0)
- 1451               		.loc 6 61 0
- 1452 0692 EF28      		or r14,r15
- 1453 0694 01F4      		brne .L103
-  62:main.c        **** 					dataBusSend(1);
- 1454               		.loc 6 62 0
- 1455 0696 81E0      		ldi r24,lo8(1)
- 1456 0698 00D0      		rcall dataBusSend
- 1457               	.LVL143:
- 1458 069a 00C0      		rjmp .L110
- 1459               	.L103:
-  63:main.c        **** 				else
-  64:main.c        **** 					dataBusSend(0);
- 1460               		.loc 6 64 0
- 1461 069c 802F      		mov r24,r16
- 1462 069e 00D0      		rcall dataBusSend
- 1463               	.LVL144:
- 1464 06a0 00C0      		rjmp .L110
- 1465               	.LVL145:
- 1466               	.L96:
- 1467               	.LBE117:
-  65:main.c        **** 				break;
-  66:main.c        **** 			}
-  67:main.c        **** 			case 3:
-  68:main.c        **** 			{
-  69:main.c        **** 				OCR1A = (int)(((float)dataBusRead() / 100.0) * 1023.0);
- 1468               		.loc 6 69 0
- 1469 06a2 00D0      		rcall dataBusRead
- 1470               	.LVL146:
- 1471 06a4 682F      		mov r22,r24
- 1472 06a6 70E0      		ldi r23,0
- 1473 06a8 80E0      		ldi r24,0
- 1474 06aa 90E0      		ldi r25,0
- 1475 06ac 00D0      		rcall __floatunsisf
- 1476               	.LVL147:
- 1477 06ae 20E0      		ldi r18,0
- 1478 06b0 30E0      		ldi r19,0
- 1479 06b2 48EC      		ldi r20,lo8(-56)
- 1480 06b4 52E4      		ldi r21,lo8(66)
- 1481 06b6 00D0      		rcall __divsf3
- 1482               	.LVL148:
- 1483 06b8 20E0      		ldi r18,0
- 1484 06ba 30EC      		ldi r19,lo8(-64)
- 1485 06bc 4FE7      		ldi r20,lo8(127)
- 1486 06be 54E4      		ldi r21,lo8(68)
- 1487 06c0 00D0      		rcall __mulsf3
- 1488               	.LVL149:
- 1489 06c2 00D0      		rcall __fixsfsi
- 1490               	.LVL150:
- 1491 06c4 7BBD      		out 0x2a+1,r23
- 1492 06c6 6ABD      		out 0x2a,r22
-  70:main.c        **** 				dataBusSend(1);
- 1493               		.loc 6 70 0
- 1494 06c8 81E0      		ldi r24,lo8(1)
- 1495 06ca 00D0      		rcall dataBusSend
- 1496               	.LVL151:
-  71:main.c        **** 				break;
- 1497               		.loc 6 71 0
- 1498 06cc 00C0      		rjmp .L110
- 1499               	.LVL152:
- 1500               	.L97:
-  72:main.c        **** 			}
-  73:main.c        **** 			case 4:
-  74:main.c        **** 			{
-  75:main.c        **** 				byte = dataBusRead();
- 1501               		.loc 6 75 0
- 1502 06ce 00D0      		rcall dataBusRead
- 1503               	.LVL153:
-  76:main.c        **** 				if(byte == 0)
- 1504               		.loc 6 76 0
- 1505 06d0 8111      		cpse r24,__zero_reg__
- 1506 06d2 00C0      		rjmp .L105
-  77:main.c        **** 				{
-  78:main.c        **** 					PORTD |= (1<<0);
- 1507               		.loc 6 78 0
- 1508 06d4 909A      		sbi 0x12,0
-  79:main.c        **** 					dataBusSend(0);
- 1509               		.loc 6 79 0
- 1510 06d6 802F      		mov r24,r16
- 1511               	.LVL154:
- 1512 06d8 00D0      		rcall dataBusSend
- 1513               	.LVL155:
- 1514 06da 00C0      		rjmp .L110
- 1515               	.LVL156:
- 1516               	.L105:
-  80:main.c        **** 				}
-  81:main.c        **** 				else
-  82:main.c        **** 				{
-  83:main.c        **** 					PORTD &= ~(1<<0);
- 1517               		.loc 6 83 0
- 1518 06dc 9098      		cbi 0x12,0
-  84:main.c        **** 					dataBusSend(1);
- 1519               		.loc 6 84 0
- 1520 06de 81E0      		ldi r24,lo8(1)
- 1521               	.LVL157:
- 1522 06e0 00D0      		rcall dataBusSend
- 1523               	.LVL158:
- 1524 06e2 00C0      		rjmp .L110
- 1525               	.LVL159:
- 1526               	.L98:
- 1527               	.LBB118:
-  85:main.c        **** 				}
-  86:main.c        **** 				break;
-  87:main.c        **** 			}
-  88:main.c        **** 			case 5:
-  89:main.c        **** 			{
-  90:main.c        **** 				uint32_t steps = 0;
-  91:main.c        **** 				char leftDir = 0;
-  92:main.c        **** 				char rightDir = 0;
-  93:main.c        **** 				steps = dataBusRead();
- 1528               		.loc 6 93 0
- 1529 06e4 00D0      		rcall dataBusRead
- 1530               	.LVL160:
- 1531 06e6 C82E      		mov r12,r24
- 1532 06e8 D12C      		mov r13,__zero_reg__
- 1533 06ea E12C      		mov r14,__zero_reg__
- 1534 06ec F12C      		mov r15,__zero_reg__
- 1535               	.LVL161:
-  94:main.c        **** 				steps += (dataBusRead()<<8);
- 1536               		.loc 6 94 0
- 1537 06ee 00D0      		rcall dataBusRead
- 1538               	.LVL162:
- 1539 06f0 382E      		mov r3,r24
- 1540 06f2 212C      		mov r2,__zero_reg__
- 1541 06f4 C101      		movw r24,r2
- 1542 06f6 AA27      		clr r26
- 1543 06f8 97FD      		sbrc r25,7
- 1544 06fa A095      		com r26
- 1545 06fc BA2F      		mov r27,r26
- 1546 06fe C80E      		add r12,r24
- 1547 0700 D91E      		adc r13,r25
- 1548 0702 EA1E      		adc r14,r26
- 1549 0704 FB1E      		adc r15,r27
- 1550               	.LVL163:
-  95:main.c        **** 				steps += (dataBusRead()<<16);
- 1551               		.loc 6 95 0
- 1552 0706 00D0      		rcall dataBusRead
- 1553               	.LVL164:
-  96:main.c        **** 				steps += (dataBusRead()<<24);
- 1554               		.loc 6 96 0
- 1555 0708 00D0      		rcall dataBusRead
- 1556               	.LVL165:
-  97:main.c        **** 				leftDir = dataBusRead();
- 1557               		.loc 6 97 0
- 1558 070a 00D0      		rcall dataBusRead
- 1559               	.LVL166:
- 1560 070c 782E      		mov r7,r24
- 1561               	.LVL167:
-  98:main.c        **** 				rightDir = dataBusRead();
- 1562               		.loc 6 98 0
- 1563 070e 00D0      		rcall dataBusRead
- 1564               	.LVL168:
-  99:main.c        **** 				drive(steps,leftDir,rightDir);
- 1565               		.loc 6 99 0
- 1566 0710 282F      		mov r18,r24
- 1567 0712 472D      		mov r20,r7
- 1568 0714 C701      		movw r24,r14
- 1569 0716 B601      		movw r22,r12
- 1570 0718 00D0      		rcall drive
- 1571               	.LVL169:
- 100:main.c        **** 				dataBusSend(1);
- 1572               		.loc 6 100 0
- 1573 071a 81E0      		ldi r24,lo8(1)
- 1574 071c 00D0      		rcall dataBusSend
- 1575               	.LVL170:
- 101:main.c        **** 				break;
- 1576               		.loc 6 101 0
- 1577 071e 00C0      		rjmp .L110
- 1578               	.LVL171:
- 1579               	.L99:
- 1580               	.LBE118:
- 1581               	.LBB119:
- 102:main.c        **** 			}
- 103:main.c        **** 			case 6:
- 104:main.c        **** 			{
- 105:main.c        **** 				uint32_t frequency = 0;
- 106:main.c        **** 				uint32_t duration = 0;
- 107:main.c        **** 				frequency = dataBusRead();
- 1582               		.loc 6 107 0
- 1583 0720 00D0      		rcall dataBusRead
- 1584               	.LVL172:
- 1585 0722 482E      		mov r4,r24
- 1586 0724 512C      		mov r5,__zero_reg__
- 1587 0726 612C      		mov r6,__zero_reg__
- 1588 0728 712C      		mov r7,__zero_reg__
- 1589               	.LVL173:
- 108:main.c        **** 				frequency += (dataBusRead()<<8);
- 1590               		.loc 6 108 0
- 1591 072a 00D0      		rcall dataBusRead
- 1592               	.LVL174:
- 1593 072c 982E      		mov r9,r24
- 1594 072e 812C      		mov r8,__zero_reg__
- 1595 0730 C401      		movw r24,r8
- 1596 0732 AA27      		clr r26
- 1597 0734 97FD      		sbrc r25,7
- 1598 0736 A095      		com r26
- 1599 0738 BA2F      		mov r27,r26
- 1600 073a 480E      		add r4,r24
- 1601 073c 591E      		adc r5,r25
- 1602 073e 6A1E      		adc r6,r26
- 1603 0740 7B1E      		adc r7,r27
- 1604               	.LVL175:
- 109:main.c        **** 				frequency += (dataBusRead()<<16);
- 1605               		.loc 6 109 0
- 1606 0742 00D0      		rcall dataBusRead
- 1607               	.LVL176:
- 110:main.c        **** 				frequency += (dataBusRead()<<24);
- 1608               		.loc 6 110 0
- 1609 0744 00D0      		rcall dataBusRead
- 1610               	.LVL177:
- 111:main.c        **** 				duration = dataBusRead();
- 1611               		.loc 6 111 0
- 1612 0746 00D0      		rcall dataBusRead
- 1613               	.LVL178:
- 1614 0748 C82E      		mov r12,r24
- 1615 074a D12C      		mov r13,__zero_reg__
- 1616 074c E12C      		mov r14,__zero_reg__
- 1617 074e F12C      		mov r15,__zero_reg__
- 1618               	.LVL179:
- 112:main.c        **** 				duration += (dataBusRead()<<8);
- 1619               		.loc 6 112 0
- 1620 0750 00D0      		rcall dataBusRead
- 1621               	.LVL180:
- 1622 0752 8A83      		std Y+2,r24
- 1623 0754 1982      		std Y+1,__zero_reg__
- 1624 0756 2981      		ldd r18,Y+1
- 1625 0758 3A81      		ldd r19,Y+2
- 1626 075a C901      		movw r24,r18
- 1627 075c AA27      		clr r26
- 1628 075e 97FD      		sbrc r25,7
- 1629 0760 A095      		com r26
- 1630 0762 BA2F      		mov r27,r26
- 1631 0764 C80E      		add r12,r24
- 1632 0766 D91E      		adc r13,r25
- 1633 0768 EA1E      		adc r14,r26
- 1634 076a FB1E      		adc r15,r27
- 1635               	.LVL181:
- 113:main.c        **** 				duration += (dataBusRead()<<16);
- 1636               		.loc 6 113 0
- 1637 076c 00D0      		rcall dataBusRead
- 1638               	.LVL182:
- 114:main.c        **** 				duration += (dataBusRead()<<24);
- 1639               		.loc 6 114 0
- 1640 076e 00D0      		rcall dataBusRead
- 1641               	.LVL183:
- 115:main.c        **** 				beep(frequency,duration);
- 1642               		.loc 6 115 0
- 1643 0770 A701      		movw r20,r14
- 1644 0772 9601      		movw r18,r12
- 1645 0774 C301      		movw r24,r6
- 1646 0776 B201      		movw r22,r4
- 1647 0778 00D0      		rcall beep
- 1648               	.LVL184:
- 116:main.c        **** 				dataBusSend(1);
- 1649               		.loc 6 116 0
- 1650 077a 81E0      		ldi r24,lo8(1)
- 1651 077c 00D0      		rcall dataBusSend
- 1652               	.LVL185:
- 117:main.c        **** 				break;
- 1653               		.loc 6 117 0
- 1654 077e 00C0      		rjmp .L110
- 1655               	.LBE119:
- 1656               	.LBE110:
- 1657               	.LFE14:
- 1965               	.Letext0:
- 1966               		.file 7 "/usr/lib/gcc/avr/4.7.2/../../../avr/include/stdint.h"
- 1967               		.file 8 "/usr/lib/gcc/avr/4.7.2/../../../avr/include/stdio.h"
- 1968               		.file 9 "/usr/lib/gcc/avr/4.7.2/../../../avr/include/math.h"
+  60:main.c        **** 				for(int i = 0; i < 100; i++)
+  61:main.c        **** 				{
+  62:main.c        **** 					dataBusSend(i);
+ 1520               		.loc 7 62 0 is_stmt 1 discriminator 2
+ 1521 06ca 812F      		mov r24,r17
+ 1522 06cc 00D0      		rcall dataBusSend
+ 1523               	.LVL148:
+ 1524 06ce 1F5F      		subi r17,lo8(-(1))
+  60:main.c        **** 				for(int i = 0; i < 100; i++)
+ 1525               		.loc 7 60 0 discriminator 2
+ 1526 06d0 1436      		cpi r17,lo8(100)
+ 1527 06d2 01F4      		brne .L113
+ 1528               	.LVL149:
+ 1529               	.LBE115:
+ 1530               	.LBB116:
+ 1531               	.LBB117:
+ 164:/usr/lib/gcc/avr/4.7.2/../../../avr/include/util/delay.h **** 	__builtin_avr_delay_cycles(__ticks_dc);
+ 1532               		.loc 2 164 0
+ 1533 06d4 8FEF      		ldi r24,lo8(159999)
+ 1534 06d6 90E7      		ldi r25,hi8(159999)
+ 1535 06d8 E2E0      		ldi r30,hlo8(159999)
+ 1536 06da 8150      		1: subi r24,1
+ 1537 06dc 9040      		sbci r25,0
+ 1538 06de E040      		sbci r30,0
+ 1539 06e0 01F4      		brne 1b
+ 1540 06e2 00C0      		rjmp .
+ 1541 06e4 0000      		nop
+ 1542               	.LBE117:
+ 1543               	.LBE116:
+  63:main.c        **** 				}
+  64:main.c        **** 				_delay_ms(50);
+  65:main.c        **** 				if(failure == 0)
+ 1544               		.loc 7 65 0
+ 1545 06e6 EF28      		or r14,r15
+ 1546 06e8 01F4      		brne .L114
+  66:main.c        **** 					dataBusSend(1);
+ 1547               		.loc 7 66 0
+ 1548 06ea 81E0      		ldi r24,lo8(1)
+ 1549 06ec 00D0      		rcall dataBusSend
+ 1550               	.LVL150:
+ 1551 06ee 00C0      		rjmp .L121
+ 1552               	.L114:
+  67:main.c        **** 				else
+  68:main.c        **** 					dataBusSend(0);
+ 1553               		.loc 7 68 0
+ 1554 06f0 802F      		mov r24,r16
+ 1555 06f2 00D0      		rcall dataBusSend
+ 1556               	.LVL151:
+ 1557 06f4 00C0      		rjmp .L121
+ 1558               	.LVL152:
+ 1559               	.L106:
+ 1560               	.LBE118:
+  69:main.c        **** 				break;
+  70:main.c        **** 			}
+  71:main.c        **** 			case 3:
+  72:main.c        **** 			{
+  73:main.c        **** 				OCR1A = (int)(((float)dataBusRead() / 100.0) * 1023.0);
+ 1561               		.loc 7 73 0
+ 1562 06f6 00D0      		rcall dataBusRead
+ 1563               	.LVL153:
+ 1564 06f8 682F      		mov r22,r24
+ 1565 06fa 70E0      		ldi r23,0
+ 1566 06fc 80E0      		ldi r24,0
+ 1567 06fe 90E0      		ldi r25,0
+ 1568 0700 00D0      		rcall __floatunsisf
+ 1569               	.LVL154:
+ 1570 0702 20E0      		ldi r18,0
+ 1571 0704 30E0      		ldi r19,0
+ 1572 0706 48EC      		ldi r20,lo8(-56)
+ 1573 0708 52E4      		ldi r21,lo8(66)
+ 1574 070a 00D0      		rcall __divsf3
+ 1575               	.LVL155:
+ 1576 070c 20E0      		ldi r18,0
+ 1577 070e 30EC      		ldi r19,lo8(-64)
+ 1578 0710 4FE7      		ldi r20,lo8(127)
+ 1579 0712 54E4      		ldi r21,lo8(68)
+ 1580 0714 00D0      		rcall __mulsf3
+ 1581               	.LVL156:
+ 1582 0716 00D0      		rcall __fixsfsi
+ 1583               	.LVL157:
+ 1584 0718 7BBD      		out 0x2a+1,r23
+ 1585 071a 6ABD      		out 0x2a,r22
+  74:main.c        **** 				dataBusSend(1);
+ 1586               		.loc 7 74 0
+ 1587 071c 81E0      		ldi r24,lo8(1)
+ 1588 071e 00D0      		rcall dataBusSend
+ 1589               	.LVL158:
+  75:main.c        **** 				break;
+ 1590               		.loc 7 75 0
+ 1591 0720 00C0      		rjmp .L121
+ 1592               	.LVL159:
+ 1593               	.L107:
+  76:main.c        **** 			}
+  77:main.c        **** 			case 4:
+  78:main.c        **** 			{
+  79:main.c        **** 				byte = dataBusRead();
+ 1594               		.loc 7 79 0
+ 1595 0722 00D0      		rcall dataBusRead
+ 1596               	.LVL160:
+  80:main.c        **** 				if(byte == 0)
+ 1597               		.loc 7 80 0
+ 1598 0724 8111      		cpse r24,__zero_reg__
+ 1599 0726 00C0      		rjmp .L116
+  81:main.c        **** 				{
+  82:main.c        **** 					PORTD |= (1<<0);
+ 1600               		.loc 7 82 0
+ 1601 0728 909A      		sbi 0x12,0
+  83:main.c        **** 					dataBusSend(0);
+ 1602               		.loc 7 83 0
+ 1603 072a 802F      		mov r24,r16
+ 1604               	.LVL161:
+ 1605 072c 00D0      		rcall dataBusSend
+ 1606               	.LVL162:
+ 1607 072e 00C0      		rjmp .L121
+ 1608               	.LVL163:
+ 1609               	.L116:
+  84:main.c        **** 				}
+  85:main.c        **** 				else
+  86:main.c        **** 				{
+  87:main.c        **** 					PORTD &= ~(1<<0);
+ 1610               		.loc 7 87 0
+ 1611 0730 9098      		cbi 0x12,0
+  88:main.c        **** 					dataBusSend(1);
+ 1612               		.loc 7 88 0
+ 1613 0732 81E0      		ldi r24,lo8(1)
+ 1614               	.LVL164:
+ 1615 0734 00D0      		rcall dataBusSend
+ 1616               	.LVL165:
+ 1617 0736 00C0      		rjmp .L121
+ 1618               	.LVL166:
+ 1619               	.L108:
+ 1620               	.LBB119:
+  89:main.c        **** 				}
+  90:main.c        **** 				break;
+  91:main.c        **** 			}
+  92:main.c        **** 			case 5:
+  93:main.c        **** 			{
+  94:main.c        **** 				uint32_t steps = 0;
+  95:main.c        **** 				char leftDir = 0;
+  96:main.c        **** 				char rightDir = 0;
+  97:main.c        **** 				steps = dataBusRead();
+ 1621               		.loc 7 97 0
+ 1622 0738 00D0      		rcall dataBusRead
+ 1623               	.LVL167:
+ 1624 073a C82E      		mov r12,r24
+ 1625 073c D12C      		mov r13,__zero_reg__
+ 1626 073e E12C      		mov r14,__zero_reg__
+ 1627 0740 F12C      		mov r15,__zero_reg__
+ 1628               	.LVL168:
+  98:main.c        **** 				steps += (dataBusRead()<<8);
+ 1629               		.loc 7 98 0
+ 1630 0742 00D0      		rcall dataBusRead
+ 1631               	.LVL169:
+ 1632 0744 382E      		mov r3,r24
+ 1633 0746 212C      		mov r2,__zero_reg__
+ 1634 0748 C101      		movw r24,r2
+ 1635 074a AA27      		clr r26
+ 1636 074c 97FD      		sbrc r25,7
+ 1637 074e A095      		com r26
+ 1638 0750 BA2F      		mov r27,r26
+ 1639 0752 C80E      		add r12,r24
+ 1640 0754 D91E      		adc r13,r25
+ 1641 0756 EA1E      		adc r14,r26
+ 1642 0758 FB1E      		adc r15,r27
+ 1643               	.LVL170:
+  99:main.c        **** 				steps += (dataBusRead()<<16);
+ 1644               		.loc 7 99 0
+ 1645 075a 00D0      		rcall dataBusRead
+ 1646               	.LVL171:
+ 100:main.c        **** 				steps += (dataBusRead()<<24);
+ 1647               		.loc 7 100 0
+ 1648 075c 00D0      		rcall dataBusRead
+ 1649               	.LVL172:
+ 101:main.c        **** 				leftDir = dataBusRead();
+ 1650               		.loc 7 101 0
+ 1651 075e 00D0      		rcall dataBusRead
+ 1652               	.LVL173:
+ 1653 0760 782E      		mov r7,r24
+ 1654               	.LVL174:
+ 102:main.c        **** 				rightDir = dataBusRead();
+ 1655               		.loc 7 102 0
+ 1656 0762 00D0      		rcall dataBusRead
+ 1657               	.LVL175:
+ 103:main.c        **** 				drive(steps,leftDir,rightDir);
+ 1658               		.loc 7 103 0
+ 1659 0764 282F      		mov r18,r24
+ 1660 0766 472D      		mov r20,r7
+ 1661 0768 C701      		movw r24,r14
+ 1662 076a B601      		movw r22,r12
+ 1663 076c 00D0      		rcall drive
+ 1664               	.LVL176:
+ 104:main.c        **** 				dataBusSend(1);
+ 1665               		.loc 7 104 0
+ 1666 076e 81E0      		ldi r24,lo8(1)
+ 1667 0770 00D0      		rcall dataBusSend
+ 1668               	.LVL177:
+ 105:main.c        **** 				break;
+ 1669               		.loc 7 105 0
+ 1670 0772 00C0      		rjmp .L121
+ 1671               	.LVL178:
+ 1672               	.L109:
+ 1673               	.LBE119:
+ 1674               	.LBB120:
+ 106:main.c        **** 			}
+ 107:main.c        **** 			case 6:
+ 108:main.c        **** 			{
+ 109:main.c        **** 				uint32_t frequency = 0;
+ 110:main.c        **** 				uint32_t duration = 0;
+ 111:main.c        **** 				frequency = dataBusRead();
+ 1675               		.loc 7 111 0
+ 1676 0774 00D0      		rcall dataBusRead
+ 1677               	.LVL179:
+ 1678 0776 482E      		mov r4,r24
+ 1679 0778 512C      		mov r5,__zero_reg__
+ 1680 077a 612C      		mov r6,__zero_reg__
+ 1681 077c 712C      		mov r7,__zero_reg__
+ 1682               	.LVL180:
+ 112:main.c        **** 				frequency += (dataBusRead()<<8);
+ 1683               		.loc 7 112 0
+ 1684 077e 00D0      		rcall dataBusRead
+ 1685               	.LVL181:
+ 1686 0780 982E      		mov r9,r24
+ 1687 0782 812C      		mov r8,__zero_reg__
+ 1688 0784 C401      		movw r24,r8
+ 1689 0786 AA27      		clr r26
+ 1690 0788 97FD      		sbrc r25,7
+ 1691 078a A095      		com r26
+ 1692 078c BA2F      		mov r27,r26
+ 1693 078e 480E      		add r4,r24
+ 1694 0790 591E      		adc r5,r25
+ 1695 0792 6A1E      		adc r6,r26
+ 1696 0794 7B1E      		adc r7,r27
+ 1697               	.LVL182:
+ 113:main.c        **** 				frequency += (dataBusRead()<<16);
+ 1698               		.loc 7 113 0
+ 1699 0796 00D0      		rcall dataBusRead
+ 1700               	.LVL183:
+ 114:main.c        **** 				frequency += (dataBusRead()<<24);
+ 1701               		.loc 7 114 0
+ 1702 0798 00D0      		rcall dataBusRead
+ 1703               	.LVL184:
+ 115:main.c        **** 				duration = dataBusRead();
+ 1704               		.loc 7 115 0
+ 1705 079a 00D0      		rcall dataBusRead
+ 1706               	.LVL185:
+ 1707 079c C82E      		mov r12,r24
+ 1708 079e D12C      		mov r13,__zero_reg__
+ 1709 07a0 E12C      		mov r14,__zero_reg__
+ 1710 07a2 F12C      		mov r15,__zero_reg__
+ 1711               	.LVL186:
+ 116:main.c        **** 				duration += (dataBusRead()<<8);
+ 1712               		.loc 7 116 0
+ 1713 07a4 00D0      		rcall dataBusRead
+ 1714               	.LVL187:
+ 1715 07a6 8A83      		std Y+2,r24
+ 1716 07a8 1982      		std Y+1,__zero_reg__
+ 1717 07aa 2981      		ldd r18,Y+1
+ 1718 07ac 3A81      		ldd r19,Y+2
+ 1719 07ae C901      		movw r24,r18
+ 1720 07b0 AA27      		clr r26
+ 1721 07b2 97FD      		sbrc r25,7
+ 1722 07b4 A095      		com r26
+ 1723 07b6 BA2F      		mov r27,r26
+ 1724 07b8 C80E      		add r12,r24
+ 1725 07ba D91E      		adc r13,r25
+ 1726 07bc EA1E      		adc r14,r26
+ 1727 07be FB1E      		adc r15,r27
+ 1728               	.LVL188:
+ 117:main.c        **** 				duration += (dataBusRead()<<16);
+ 1729               		.loc 7 117 0
+ 1730 07c0 00D0      		rcall dataBusRead
+ 1731               	.LVL189:
+ 118:main.c        **** 				duration += (dataBusRead()<<24);
+ 1732               		.loc 7 118 0
+ 1733 07c2 00D0      		rcall dataBusRead
+ 1734               	.LVL190:
+ 119:main.c        **** 				beep(frequency,duration);
+ 1735               		.loc 7 119 0
+ 1736 07c4 A701      		movw r20,r14
+ 1737 07c6 9601      		movw r18,r12
+ 1738 07c8 C301      		movw r24,r6
+ 1739 07ca B201      		movw r22,r4
+ 1740 07cc 00D0      		rcall beep
+ 1741               	.LVL191:
+ 120:main.c        **** 				dataBusSend(1);
+ 1742               		.loc 7 120 0
+ 1743 07ce 81E0      		ldi r24,lo8(1)
+ 1744 07d0 00D0      		rcall dataBusSend
+ 1745               	.LVL192:
+ 121:main.c        **** 				break;
+ 1746               		.loc 7 121 0
+ 1747 07d2 00C0      		rjmp .L121
+ 1748               	.LVL193:
+ 1749               	.L110:
+ 1750               	.LBE120:
+ 1751               	.LBB121:
+ 122:main.c        **** 			}
+ 123:main.c        **** 			case 13:
+ 124:main.c        **** 			{
+ 125:main.c        **** 				unsigned int value = 0;
+ 126:main.c        **** 				value = adcRead(dataBusRead());
+ 1752               		.loc 7 126 0
+ 1753 07d4 00D0      		rcall dataBusRead
+ 1754               	.LVL194:
+ 1755 07d6 00D0      		rcall adcRead
+ 1756               	.LVL195:
+ 1757 07d8 F92E      		mov r15,r25
+ 1758               	.LVL196:
+ 127:main.c        **** 				dataBusSend((char)value);
+ 1759               		.loc 7 127 0
+ 1760 07da 00D0      		rcall dataBusSend
+ 1761               	.LVL197:
+ 128:main.c        **** 				dataBusSend((char)(value>>8));
+ 1762               		.loc 7 128 0
+ 1763 07dc 8F2D      		mov r24,r15
+ 1764 07de 00D0      		rcall dataBusSend
+ 1765               	.LVL198:
+ 129:main.c        **** 				break;
+ 1766               		.loc 7 129 0
+ 1767 07e0 00C0      		rjmp .L121
+ 1768               	.LBE121:
+ 1769               	.LBE111:
+ 1770               	.LFE16:
+ 2094               	.Letext0:
+ 2095               		.file 8 "/usr/lib/gcc/avr/4.7.2/../../../avr/include/stdint.h"
+ 2096               		.file 9 "/usr/lib/gcc/avr/4.7.2/../../../avr/include/stdio.h"
+ 2097               		.file 10 "/usr/lib/gcc/avr/4.7.2/../../../avr/include/math.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 main.c
-     /tmp/cctJpV4n.s:2      *ABS*:000000000000003e __SP_H__
-     /tmp/cctJpV4n.s:3      *ABS*:000000000000003d __SP_L__
-     /tmp/cctJpV4n.s:4      *ABS*:000000000000003f __SREG__
-     /tmp/cctJpV4n.s:5      *ABS*:0000000000000000 __tmp_reg__
-     /tmp/cctJpV4n.s:6      *ABS*:0000000000000001 __zero_reg__
-     /tmp/cctJpV4n.s:16     .text:0000000000000000 drive
-     /tmp/cctJpV4n.s:828    .text:000000000000040e usart_putChar
-     /tmp/cctJpV4n.s:862    .text:0000000000000426 usart_getChar
-     /tmp/cctJpV4n.s:884    .text:0000000000000430 usart_init
-     /tmp/cctJpV4n.s:919    .text:000000000000044c dataBusRead
-     /tmp/cctJpV4n.s:992    .text:0000000000000492 dataBusSend
-     /tmp/cctJpV4n.s:1083   .text:00000000000004e4 beep
-     /tmp/cctJpV4n.s:1308   .text:00000000000005f2 main
+     /tmp/ccU4eBU8.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccU4eBU8.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccU4eBU8.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccU4eBU8.s:5      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccU4eBU8.s:6      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccU4eBU8.s:16     .text:0000000000000000 drive
+     /tmp/ccU4eBU8.s:828    .text:000000000000040e usart_putChar
+     /tmp/ccU4eBU8.s:862    .text:0000000000000426 usart_getChar
+     /tmp/ccU4eBU8.s:884    .text:0000000000000430 usart_init
+     /tmp/ccU4eBU8.s:919    .text:000000000000044c dataBusRead
+     /tmp/ccU4eBU8.s:992    .text:0000000000000492 dataBusSend
+     /tmp/ccU4eBU8.s:1083   .text:00000000000004e4 beep
+     /tmp/ccU4eBU8.s:1307   .text:00000000000005f2 adcInit
+     /tmp/ccU4eBU8.s:1337   .text:0000000000000608 adcRead
+     /tmp/ccU4eBU8.s:1396   .text:0000000000000640 main
 
 UNDEFINED SYMBOLS
 __floatsisf

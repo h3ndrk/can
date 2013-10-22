@@ -266,6 +266,27 @@ void execCommands(int commandId, char *commandParam)
 			driveToAngle(angle);
 			break;
 		}
+		//  get adc-value of given channel via command parameters
+		case 13:
+		{
+			char channel = 0;
+			unsigned int value = 0;
+			
+			// transmit command-ID
+			dataBusSend(13);
+			
+			// transmit adc-channel
+			sscanf(commandParam,"%i",&channel);
+			dataBusSend(channel);
+			
+			// receive response (16bit) from mikrocontroller
+			value = dataBusRead();
+			value += (dataBusRead()<<8);
+			
+			// output the received value
+			printf("%i\n",value);
+			break;
+		}
 		// if the users inputs a command-ID which is not supported output:
 		// "no such command"
 		default:

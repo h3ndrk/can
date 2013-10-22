@@ -8,4 +8,5 @@
 #include "./motor.h"
 #include "./usart.h"
 #include "./communication.h"
-#include "other.h"
+#include "./other.h"
+#include "./adc.h"

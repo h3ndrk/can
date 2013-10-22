@@ -41,6 +41,9 @@ int main(void)
 	// indicate startup finish with beep
 	beep(1500,50);
 	
+	// initialize adc
+	adcInit();
+	
 	while(1)
 	{
 		char byte = dataBusRead();
@@ -115,6 +118,14 @@ int main(void)
 				duration += (dataBusRead()<<24);
 				beep(frequency,duration);
 				dataBusSend(1);
+				break;
+			}
+			case 13:
+			{
+				unsigned int value = 0;
+				value = adcRead(dataBusRead());
+				dataBusSend((char)value);
+				dataBusSend((char)(value>>8));
 				break;
 			}
 		}
