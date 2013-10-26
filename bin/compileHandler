@@ -15,7 +15,7 @@ echo `$command` > ./build
 ./configure
 
 # Compile handler
-gcc -D_REENTRANT ./bin/handler.c -Wall -o ./bin/can-handler -std=c99 -D _BSD_SOURCE -lwiringPi -lm -ljpeg
+gcc -D_REENTRANT ./bin/handler.c -Wall -o ./bin/can-handler -D _BSD_SOURCE -lwiringPi -lm -ljpeg
 
 # Change back to working directory
 cd $currentDir

@@ -5,6 +5,7 @@
 **/
 void execCommands(int commandId, char *commandParam)
 {
+	int i;
 	switch(commandId)
 	{
 		//  take picture and output the calculated distance between robot and
@@ -30,7 +31,7 @@ void execCommands(int commandId, char *commandParam)
 			
 			t = clock();
 			
-			for(int i = 0; i < 100; i++)
+			for(i = 0; i < 100; i++)
 			{
 				dataBusSend(i);
 			}
@@ -47,7 +48,7 @@ void execCommands(int commandId, char *commandParam)
 			
 			t = clock();
 			
-			for(int i = 0; i < 100; i++)
+			for(i = 0; i < 100; i++)
 			{
 				byte = dataBusRead();
 				if(byte != i)
@@ -205,7 +206,7 @@ void execCommands(int commandId, char *commandParam)
 			
 			sscanf(commandParam,"%i %i",&duration,&stopping);
 			
-			for(int i = 0; i < sizeof(frequencyArray) / sizeof(frequencyArray[0]); i++)
+			for(i = 0; i < sizeof(frequencyArray) / sizeof(frequencyArray[0]); i++)
 			{
 				snprintf(commandParamBuffer,255,"%i %i",frequencyArray[i],duration);
 				execCommands(6,commandParamBuffer);
@@ -269,7 +270,7 @@ void execCommands(int commandId, char *commandParam)
 		//  get adc-value of given channel via command parameters <channel:number>
 		case 13:
 		{
-			char channel = 0;
+			int channel = 0;
 			unsigned int value = 0;
 			
 			// transmit command-ID
@@ -277,7 +278,7 @@ void execCommands(int commandId, char *commandParam)
 			
 			// transmit adc-channel
 			sscanf(commandParam,"%i",&channel);
-			dataBusSend(channel);
+			dataBusSend((char)channel);
 			
 			// receive response (16bit) from mikrocontroller
 			value = dataBusRead();

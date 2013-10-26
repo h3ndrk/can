@@ -55,6 +55,8 @@ int readFromFile(char *filename)
 **/
 void dataBusSend(char byte)
 {
+	int i;
+	
 	if(DEBUG)
 		printf("SEND: %3i %i%i%i%i%i%i%i%i",byte,(byte&(1<<0))?(1):(0),
 		(byte&(1<<1))?(1):(0),(byte&(1<<2))?(1):(0),(byte&(1<<3))?(1):(0),
@@ -66,7 +68,7 @@ void dataBusSend(char byte)
 	pinMode(25,OUTPUT);
 		
 	// transmitting the byte
-	for(int i = 0; i < 8; i++)
+	for(i = 0; i < 8; i++)
 	{
 		if(byte & (1<<i))
 		{
@@ -117,6 +119,7 @@ void falling(void)
 char dataBusRead(void)
 {
 	char byte = 0;
+	int i;
 	
 	if(DEBUG)
 		printf("GET :");
@@ -126,7 +129,7 @@ char dataBusRead(void)
 	pinMode(8,INPUT);
 	
 	// receiving the byte
-	for(int i = 0; i < 8; i++)
+	for(i = 0; i < 8; i++)
 	{
 		// wait for clock
 		while(digitalRead(8) == 0)

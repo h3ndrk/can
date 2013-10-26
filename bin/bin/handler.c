@@ -25,6 +25,7 @@ char reset[] = "\x1b[0m";
 
 int main(int argc, char *argv[])
 {
+	int i;
 	int commandId = 0;
 	char *commandParam;
 	
@@ -43,18 +44,18 @@ int main(int argc, char *argv[])
 	{
 		int parameterLength = 0;
 		sscanf(argv[2],"%i",&commandId);
-		for(int i = 3; i < argc; i++)
+		for(i = 3; i < argc; i++)
 		{
 			parameterLength += strlen(argv[i]) + 1;
 		}
 		commandParam = malloc((parameterLength) * sizeof(char));
-		for(int i = 3; i < argc; i++)
+		for(i = 3; i < argc; i++)
 		{
 			strcat(commandParam,argv[i]);
 			strcat(commandParam," ");
 		}
 		commandParam[parameterLength - 1] = '\0';
-		for(int i = 0; i < strlen(argv[1]); i++)
+		for(i = 0; i < strlen(argv[1]); i++)
 		{
 			switch(argv[1][i])
 			{

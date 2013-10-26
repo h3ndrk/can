@@ -1,5 +1,6 @@
 void imageRecognition(void)
 {
+	int x,y;
 	unsigned char r = 0;
 	unsigned char g = 0;
 	unsigned char b = 0;
@@ -34,20 +35,20 @@ void imageRecognition(void)
 	// create pixel array
 	int ***pixel;
 	pixel = malloc(height * sizeof(int **));
-	for(int y = 0; y < height; y++)
+	for(y = 0; y < height; y++)
 	{
 		pixel[y] = malloc(width * sizeof(int *));
-		for(int x = 0; x < width; x++)
+		for(x = 0; x < width; x++)
 		{
 			pixel[y][x] = malloc(3 * sizeof(int));
 		}
 	}
 	
 	// read lines of image
-	for(int y = 0; cinfo.output_scanline < cinfo.output_height; y++)
+	for(y = 0; cinfo.output_scanline < cinfo.output_height; y++)
 	{
 		(void)jpeg_read_scanlines(&cinfo,rowPointer,1);
-		for(int x = 0; x < cinfo.output_width; x++)
+		for(x = 0; x < cinfo.output_width; x++)
 		{
 			r = rowPointer[0][cinfo.output_components * x];
 			if(cinfo.output_components > 2)
@@ -73,9 +74,9 @@ void imageRecognition(void)
 	double averageY = 0;
 	int averageCount = 0;
 	
-	for(int y = 0; y < height; y++)
+	for(y = 0; y < height; y++)
 	{
-		for(int x = 0; x < width; x++)
+		for(x = 0; x < width; x++)
 		{
 			// contrast
 			pixel[y][x][0] = (pixel[y][x][0] < 128) ? 0 : 255;
@@ -116,9 +117,9 @@ void imageRecognition(void)
 	printf(" done.\n");
 	
 	// freeing memory
-	for(int y = 0; y < height; y++)
+	for(y = 0; y < height; y++)
 	{
-		for(int x = 0; x < width; x++)
+		for(x = 0; x < width; x++)
 		{
 			free(pixel[y][x]);
 		}
