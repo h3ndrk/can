@@ -1,8 +1,8 @@
 <?php
 	session_start();
-	if(isset($_GET["login"]) && empty($_SESSION["loggedIn"]) && !empty($_POST["pwd"]))
+	if(isset($_GET["login"]) && empty($_SESSION["loggedIn"]) && !empty($_POST["key"]))
 	{
-		if(md5(htmlspecialchars($_POST["pwd"])) == "2332229a2f3e5a72f7a5863bfe8d07bf")
+		if(md5(htmlspecialchars($_POST["key"])) == "2332229a2f3e5a72f7a5863bfe8d07bf")
 		{
 			$_SESSION["loggedIn"] = 1;
 			header("Location: .");
@@ -17,168 +17,170 @@
 		$_SESSION["loggedIn"] = 0;
 		$_SESSION = array();
 		session_destroy();
-		header("Location: .");
 	}
 	if(!empty($_SESSION["loggedIn"])) {
-?>
-<!DOCTYPE html>
+?><!DOCTYPE html>
 <html>
 	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
 		<title>Roboter CAN</title>
-		<script>
-			var windows = new Array();
-			function show(parameter)
-			{
-				windows.push(window.open("./templates/" + parameter + ".php","","innerWidth=1000,innerHeight=562,dependent=yes,location=no,resizeable=no,status=no,toolbar=no"));
-			}
-			function hideAll()
-			{
-				for(i = 0; i < windows.length; i++)
-				{
-					if(windows[i].closed == false)
-						windows[i].close();
-				}
-			}
-		</script>
+		<script src="canvas.js.php"></script>
+		<!--<script src="canvasImage.js.php"></script>-->
+		<script src="websocket.js.php"></script>
+		<script src="script.js.php"></script>
 		<style type="text/css">
-			html
-			{
-				width: 100%;
-				height: 100%;
-			}
 			body
 			{
+				margin: 0;
+				overflow: hidden;
 				font-family: Arial, sans, sans-serif;
 				font-size: 15px;
-				width: 100%;
-				height: 100%;
-				margin: 0;
-				padding: 0 0 0 0;
-				background-image: url(background.png);
-				background-repeat: repeat;
-				box-shadow: inset 0 0 500px rgba(0,0,0,0.25);
+				color: #000000;
+				background-color: #F2F2F2;
 			}
-			#bar
+			#header
 			{
 				position: absolute;
+				top: 20px;
+				left: 20px;
+			}
+			#header a img
+			{
+				border: none;
+				text-decoration: none;
+			}
+			#name
+			{
+				font-size: 20px;
+				text-shadow: 0 0 5px #F2F2F2, 0 0 5px #F2F2F2, 0 0 5px #F2F2F2;
+			}
+			#connected
+			{
+				font-size: 20px;
+				text-shadow: 0 0 5px #F2F2F2, 0 0 5px #F2F2F2, 0 0 5px #F2F2F2;
+			}
+			#connected.connected
+			{
+				color: #00CC00;
+			}
+			#connected.disconnected
+			{
+				color: #CC0000;
+			}
+			#reconnect
+			{
+				text-shadow: 0 0 5px #F2F2F2, 0 0 5px #F2F2F2, 0 0 5px #F2F2F2;
+				font-size: 13px;
+				color: #888888;
+			}
+			#box
+			{
+				position: absolute;
+				background-color: #FFFFFF;
+				width: 300px;
 				top: 0;
 				bottom: 0;
 				left: 0;
-				right: 0;
-				height: 35px;
-				background-color: rgba(0,0,0,0.0625);
-				box-shadow: inset 0 -3px 3px -3px rgba(0,0,0,0.25), inset 0 -10px 10px -10px rgba(0,0,0,0.25), inset 0 -35px 35px -35px rgba(0,0,0,0.25);
-				overflow-y: auto;
+				box-shadow: 1px 0 2px rgba(0,0,0,0.125), 2px 0 7px rgba(0,0,0,0.125), 3px 0 15px rgba(0,0,0,0.125), 5px 0 25px rgba(0,0,0,0.125), 10px 0 30px rgba(0,0,0,0.125), 25px 0 75px rgba(0,0,0,0.125);
 				overflow-x: hidden;
-				-moz-transition: all 0.25s ease-in-out;
-				-webkit-transition: all 0.25s ease-in-out;
-				-o-transition: all 0.25s ease-in-out;
-				-ms-transition: all 0.25s ease-in-out;
-				transition: all 0.25s ease-in-out;
+				overflow-y: auto;
+				visibility: visible;
+				opacity: 1;
+				-moz-transition: all 0.25s ease-out;
+				-webkit-transition: all 0.25s ease-out;
+				-o-transition: all 0.25s ease-out;
+				-ms-transition: all 0.25s ease-out;
+				transition: all 0.25s ease-out;
 			}
-			#bar span
+			#box.hidden
 			{
-				display: inline-block;
-				padding: 8px 15px;
-				color: #222222;
-				text-shadow: 0 1px 0 rgba(255,255,255,0.25);
+				left: -300px;
+				visibility: hidden;
+				opacity: 0;
 			}
-			#bar a
+			#box .boxLine
 			{
-				display: inline-block;
-				padding: 8px 15px;
+				padding: 5px 20px;
 				color: #444444;
-				text-shadow: 0 1px 0 rgba(255,255,255,0.25);
-				text-decoration: none;
-				float: right;
+				background-color: #F2F2F2;
+				box-shadow: inset 0 1px 1px rgba(0,0,0,0.125);
 			}
-			#bar a:hover
+			#box .boxContent
 			{
-				background-color: rgba(255,255,255,0.25);
-			}
-			#content
-			{
-				position: absolute;
-				top: 35px;
-				bottom: 0;
-				left: 0;
-				right: 0;
-				overflow: auto;
 				padding: 20px;
-				color: #444444;
-			}
-			#content h1
-			{
-				font-weight: normal;
-				font-size: 20px;
 				color: #222222;
-				margin: 0 0 20px 0;
 			}
-			#content p
+			#box .boxContent.noPadding
 			{
-				font-weight: normal;
+				padding: 0 20px 20px 20px;
+			}
+			#box .boxContent span
+			{
+				color: #666666;
+			}
+			#box button
+			{
+				background-color: #DDDDDD;
+				box-shadow: 0 2px 0 #BBBBBB;
+				padding: 4px 15px 3px 15px;
+				font-family: Arial, sans, sans-serif;
 				font-size: 15px;
 				color: #444444;
-				margin: 15px 0 20px 0;
-			}
-			#content table
-			{
-				border-spacing: 0;
-				margin: 0;
-				padding: 0;
+				border: none;
+				border-radius: 2px;
 				width: 100%;
-				height: 100%;
-			}
-			#content table tr
-			{
-				margin: 0;
-				padding: 0;
-			}
-			#content table tr td
-			{
-				margin: 0;
-				padding: 0;
-				font-size: 25px;
-				color: #444444;
-				text-align: center;
-				width: 33.333%;
-				height: 50%;
 				cursor: pointer;
+				display: block;
 			}
-			#content table tr td:hover
+			#box button:hover
 			{
-				box-shadow: inset 0 0 0 1px rgba(0,0,0,0.125);
-			}
-			#content table tr td pre
-			{
-				margin: 0;
-				padding: 0;
+				background-color: #EEEEEE;
 			}
 		</style>
 	</head>
-	<body onUnload='hideAll();'>
-		<div id="bar" onMouseover='document.getElementById("bar").className="active";document.getElementById("content").className="active";' onMouseout='document.getElementById("bar").className="";document.getElementById("content").className="";'>
-			<span>Roboter CAN</span><a class="right" href="?logout">Abmelden</a>
-		</div>
-		<div id="content">
+	<body onload="canvasInit();websocketInit();">
+		<div id="header">
 			<table>
 				<tr>
-					<td onClick='show("informations");'>Informationen</td>
-					<td onClick='show("distance");'>Entfernungsmessung</td>
-					<td onClick='show("commands");'>Befehle</td>
-				</tr>
-				<tr>
-					<td onClick='show("images");'>Sensorbilder</td>
-					<td onClick='show("network");'>Netzwerk</td>
+					<td><a href="#" onClick="showBox();"><img src="canLogo.png" alt="" /></a></td>
+					<td><div id="name">Roboter CAN</div><div id="connected" class="disconnected">NOT CONNECTED</div><div id="reconnect"></div></td>
 				</tr>
 			</table>
 		</div>
+		<div id="box" class="hidden">
+			<div class="boxLine">General</div>
+			<div class="boxContent">
+				<button onClick="document.location.href='?logout';">Logout</button>
+			</div>
+			<div class="boxContent noPadding">
+				Hostname: <span id="generalHostname">?</span><br />
+				Kernel: <span id="generalKernel">?</span><br />
+				Architecture: <span id="generalArchitecture">?</span><br />
+				System: <span id="generalSystem">?</span><br />
+				Date: <span id="generalDate">?</span><br />
+				Uptime: <span id="generalUptime">?</span><br />
+			</div>
+			<div class="boxLine">Position</div>
+			<div class="boxContent">
+				Robot X: <span id="robotX">?</span><span> mm</span><br />
+				Robot Y: <span id="robotY">?</span><span> mm</span><br />
+				Robot ANGLE: <span id="robotAngle">?</span><span> &deg;</span><br />
+				Robot target X: <span id="robotTargetX">?</span><span> mm</span><br />
+				Robot target Y: <span id="robotTargetY">?</span><span> mm</span>
+			</div>
+			<div class="boxLine">CPU</div>
+			<div class="boxContent">
+				Temperature: <span id="cpuTemp">?</span><span> &deg;C</span><br />
+				Volts: <span id="cpuVolts">?</span><span> Volt</span><br />
+				Clock: <span id="cpuClock">?</span><span> MHz</span>
+			</div>
+		</div>
+		<canvas style="cursor: default; margin: 0; padding: 0;" height="947" width="1680" id="canvas"></canvas>
 	</body>
-</html>
-<?php } else { ?>
-<!DOCTYPE html>
+</html><?php } else { ?><!DOCTYPE html>
 <html>
 	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
 		<title>Roboter CAN</title>
 		<style type="text/css">
 			html
@@ -192,10 +194,8 @@
 				width: 100%;
 				height: 100%;
 				margin: 0;
-				padding: 0 0 0 0;
-				background-image: url(background.png);
-				background-repeat: repeat;
-				box-shadow: inset 0 0 500px rgba(0,0,0,0.25);
+				padding: 0;
+				background-color: #F2F2F2;
 			}
 			div#overlay
 			{
@@ -208,9 +208,9 @@
 				width: 320px;
 				padding: 20px;
 				margin: 0 auto 0 auto;
-				background-color: rgba(0,0,0,0.125);
-				border-radius: 3px;
-				box-shadow: inset 0 1px 3px rgba(0,0,0,0.125);
+				background-color: #FFFFFF;
+				border-radius: 2px;
+				box-shadow: 0 1px 2px rgba(0,0,0,0.125), 0 1px 7px rgba(0,0,0,0.125), 0 1px 15px rgba(0,0,0,0.125), 0 1px 25px rgba(0,0,0,0.125);
 				text-align: center;
 			}
 			div#login h1
@@ -225,26 +225,27 @@
 			{
 				margin: 10px auto;
 				display: block;
-				background-color: #FFFFFF;
+				background-image: url(input.png);
+				background-position: center bottom;
+				background-repeat: no-repeat;
 				width: 300px;
 				padding: 10px;
 				border: none;
-				border-radius: 3px;
-				box-shadow: 0 1px 2px rgba(0,0,0,0.25);
 				font-family: Arial, sans, sans-serif;
 				font-size: 15px;
 				color: #444444;
 			}
 			div#login input[type="submit"]
 			{
+				cursor: pointer;
 				margin: 10px auto 10px auto;
 				display: block;
-				background-color: rgba(255,255,255,0.5);
+				background-color: #DDDDDD;
 				width: 320px;
-				padding: 10px;
+				padding: 10px 10px 8px 10px;
 				border: none;
-				border-radius: 3px;
-				box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+				border-radius: 2px;
+				box-shadow: 0 2px 0 #CCCCCC;
 				font-family: Arial, sans, sans-serif;
 				font-size: 15px;
 				color: #444444;
@@ -270,13 +271,12 @@
 	<body>
 		<div id="overlay"><div id="login">
 			<img src="canLogo.png" alt="" />
-			<?php if(!isset($_GET["error"])) { ?><h1>Roboter CAN</h1><?php } else { ?><h1 style="color: #AA0000;">Zugriff verweigert</h1><?php } ?>
+			<?php if(!isset($_GET["error"])) { ?><h1>Roboter CAN</h1><?php } else { ?><h1 style="color: #AA0000;">Access denied</h1><?php } ?>
 			<form action="?login" method="post">
-				<input type="password" name="pwd" placeholder="Passwort" autofocus />
+				<input type="password" name="key" placeholder="Access-Key" autofocus />
 				<input type="submit" value="Anmelden" />
 			</form>
-			<h2>&copy; <?php date_default_timezone_set("Europe/Berlin"); echo date("Y"); ?> by Hendrik Sieck, <a href="http://www.nipe-systems.de" target="_blank">NIPE-SYSTEMS.de</a></h2>
+			<h2>&copy; 2013 by Hendrik Sieck, NIPE-SYSTEMS.de<br />Team Partyzone Glinde</h2>
 		</div></div>
 	</body>
-</html>
-<?php } ?>
+</html><?php } ?>

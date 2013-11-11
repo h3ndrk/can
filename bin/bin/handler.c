@@ -7,6 +7,11 @@
 #include <math.h>        // sensor image filename
 #include <wiringPi.h>    // wiringPi
 #include <jpeglib.h>     // libjpeg
+#include <sys/socket.h> // IPC-Socket
+#include <sys/types.h> // IPC-Socket
+#include <netdb.h> // IPC-Socket
+#include <netinet/in.h> // IPC-Socket
+#include <arpa/inet.h> // IPC-Socket
 
 // DEBUG = 0 = no debug messages at stdout, DEBUG = 1 = debug messages at stdout
 int DEBUG = 0;
@@ -15,6 +20,7 @@ int DEBUG = 0;
 char red[] = "\x1b[31m";
 char green[] = "\x1b[32m";
 char reset[] = "\x1b[0m";
+char ipcDelimiter[] = "|";
 
 #include "globals.h"
 #include "handlerCore.h"

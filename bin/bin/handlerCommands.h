@@ -202,13 +202,13 @@ void execCommands(int commandId, char *commandParam)
 			int duration;
 			int stopping;
 			int frequencyArray[40] = {523,587,659,698,784,784,784,784,880,880,880,880,784,784,784,784,880,880,880,880,784,784,784,784,698,698,698,698,659,659,659,659,784,784,784,784,523,523,523,523};
-			char commandParamBuffer[255];
+			char commandParamBuffer[256];
 			
 			sscanf(commandParam,"%i %i",&duration,&stopping);
 			
 			for(i = 0; i < sizeof(frequencyArray) / sizeof(frequencyArray[0]); i++)
 			{
-				snprintf(commandParamBuffer,255,"%i %i",frequencyArray[i],duration);
+				snprintf(commandParamBuffer,256,"%i %i",frequencyArray[i],duration);
 				execCommands(6,commandParamBuffer);
 				
 				usleep(stopping);
@@ -221,10 +221,10 @@ void execCommands(int commandId, char *commandParam)
 			float mm = 0.0;
 			int direction = 0;
 			int steps = 0;
-			char commandParamBuffer[255];
+			char commandParamBuffer[256];
 			sscanf(commandParam,"%f %i",&mm,&direction);
 			steps = convertMmToSteps(mm);
-			snprintf(commandParamBuffer,255,"%i %i %i",steps,direction,direction);
+			snprintf(commandParamBuffer,256,"%i %i %i",steps,direction,direction);
 			execCommands(5,commandParamBuffer);
 			break;
 		}
@@ -234,10 +234,10 @@ void execCommands(int commandId, char *commandParam)
 			float angle = 0.0;
 			int direction = 0;
 			int steps = 0;
-			char commandParamBuffer[255];
+			char commandParamBuffer[256];
 			sscanf(commandParam,"%f %i",&angle,&direction);
 			steps = convertAngleToSteps(angle);
-			snprintf(commandParamBuffer,255,"%i %i %i",steps,(direction == 0) ? 1 : 0,direction);
+			snprintf(commandParamBuffer,256,"%i %i %i",steps,(direction == 0) ? 1 : 0,direction);
 			execCommands(5,commandParamBuffer);
 			break;
 		}
@@ -286,6 +286,66 @@ void execCommands(int commandId, char *commandParam)
 			
 			// output the received value
 			printf("%i\n",value);
+			break;
+		}
+		//  send all informations to IPC-Socket
+		case 14:
+		{
+			position_t position;
+			char buffer[1024];
+			FILE *fd;
+			char generalHostname[256];
+			char generalKernel[256];
+			char generalArchitecture[256];
+			char generalSystem[256];
+			char generalDate[256];
+			char generalUptime[256];
+			float cpuTemp = 0.0;
+			float cpuVolts = 0.0;
+			int cpuClock = 0;
+			
+			// general
+			fd = popen("hostname","r");
+			fscanf(fd,"%[^\n]",generalHostname);
+			pclose(fd);
+			
+			fd = popen("uname -s","r");
+			fscanf(fd,"%[^\n]",generalKernel);
+			pclose(fd);
+			
+			fd = popen("uname -m","r");
+			fscanf(fd,"%[^\n]",generalArchitecture);
+			pclose(fd);
+			
+			fd = popen("uname -o","r");
+			fscanf(fd,"%[^\n]",generalSystem);
+			pclose(fd);
+			
+			fd = popen("date","r");
+			fscanf(fd,"%[^\n]",generalDate);
+			pclose(fd);
+			
+			fd = popen("uptime","r");
+			fscanf(fd,"%[^\n]",generalUptime);
+			pclose(fd);
+			
+			snprintf(buffer,1024,"general%s%s%s%s%s%s%s%s%s%s%s%s",ipcDelimiter,generalHostname,ipcDelimiter,generalKernel,ipcDelimiter,generalArchitecture,ipcDelimiter,generalSystem,ipcDelimiter,generalDate,ipcDelimiter,generalUptime);
+			
+			ipcSend(buffer);
+
+			// position
+			position = loadPosition();
+			snprintf(buffer,1024,"position%s%f%s%f%s%f%s%f%s%f",ipcDelimiter,position.x,ipcDelimiter,position.y,ipcDelimiter,position.angle,ipcDelimiter,0.0,ipcDelimiter,0.0);
+			
+			ipcSend(buffer);
+			
+			// cpu
+			fd = fopen("/usr/share/nginx/html/bin/values/cpu","r");
+			fscanf(fd,"%f %f %i",&cpuTemp,&cpuVolts,&cpuClock);
+			fclose(fd);
+			snprintf(buffer,1024,"cpu%s%f%s%f%s%i",ipcDelimiter,cpuTemp,ipcDelimiter,cpuVolts,ipcDelimiter,cpuClock);
+			
+			ipcSend(buffer);
 			break;
 		}
 		// if the users inputs a command-ID which is not supported output:

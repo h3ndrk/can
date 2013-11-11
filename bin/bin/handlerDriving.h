@@ -147,11 +147,17 @@ position_t loadPosition(void)
 **/
 void resetPosition(void)
 {
+	char buffer[1024];
 	position_t position;
+	
 	position.x = 0.0;
 	position.y = 0.0;
 	position.angle = 90.0;
 	savePosition(position);
+
+	snprintf(buffer,1024,"position%s%f%s%f%s%f%s%f%s%f",ipcDelimiter,position.x,ipcDelimiter,position.y,ipcDelimiter,position.angle,ipcDelimiter,0.0,ipcDelimiter,0.0);
+	
+	ipcSend(buffer);
 }
 
 /**
@@ -176,6 +182,7 @@ void driveToPosition(float x, float y)
 	float xDelta = 0.0;
 	float yDelta = 0.0;
 	char commandParamBuffer[255];
+	char buffer[1024];
 	
 	if(DEBUG)
 		printf("drive to position: ( X: %f | Y: %f )\n",x,y);
@@ -196,6 +203,10 @@ void driveToPosition(float x, float y)
 	newPosition.y = newPoint.y + currentPosition.y;
 	newPosition.angle = newPoint.angle;
 	savePosition(newPosition);
+
+	snprintf(buffer,1024,"position%s%f%s%f%s%f%s%f%s%f",ipcDelimiter,newPosition.x,ipcDelimiter,newPosition.y,ipcDelimiter,newPosition.angle,ipcDelimiter,0.0,ipcDelimiter,0.0);
+	
+	ipcSend(buffer);
 	
 	// drive to position
 	if(DEBUG)
@@ -217,6 +228,7 @@ void driveToAngle(float angle)
 	position_t position;
 	char commandParamBuffer[255];
 	float driveAngle = 0.0;
+	char buffer[1024];
 	
 	if(DEBUG)
 		printf("turn to angle: ( ANGLE: %f )\n",angle);
@@ -230,6 +242,10 @@ void driveToAngle(float angle)
 	// save new position
 	position.angle += driveAngle;
 	savePosition(position);
+	
+	snprintf(buffer,1024,"position%s%f%s%f%s%f%s%f%s%f",ipcDelimiter,position.x,ipcDelimiter,position.y,ipcDelimiter,position.angle,ipcDelimiter,0.0,ipcDelimiter,0.0);
+	
+	ipcSend(buffer);
 	
 	// drive to angle
 	if(DEBUG)
