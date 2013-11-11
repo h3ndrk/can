@@ -1,0 +1,19 @@
+#!/bin/bash
+
+currentDir=$(pwd)
+
+# Change to build directory
+cd /usr/share/nginx/html
+
+# Update build counter
+counter=`cat ./build`
+command="expr $counter + 1"
+echo "BUILD: "`$command`
+echo `$command` > ./build
+
+# Compile handler
+gcc -D_REENTRANT ./bin/can-server.c -Wall -o ./bin/can-server -pthread
+
+# Change back to working directory
+cd $currentDir
+

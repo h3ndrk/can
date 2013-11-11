@@ -1,0 +1,4 @@
+build
+bin/globals.h
+bin/values/cpu
+bin/values/position
