@@ -155,7 +155,7 @@ void resetPosition(void)
 	position.angle = 90.0;
 	savePosition(position);
 
-	snprintf(buffer,1024,"position%s%f%s%f%s%f%s%f%s%f",ipcDelimiter,position.x,ipcDelimiter,position.y,ipcDelimiter,position.angle,ipcDelimiter,0.0,ipcDelimiter,0.0);
+	snprintf(buffer,1024,"position%s%f%s%f%s%f%s%s%s%s",ipcDelimiter,position.x,ipcDelimiter,position.y,ipcDelimiter,position.angle,ipcDelimiter,"none",ipcDelimiter,"none");
 	
 	ipcSend(buffer);
 }
@@ -204,7 +204,7 @@ void driveToPosition(float x, float y)
 	newPosition.angle = newPoint.angle;
 	savePosition(newPosition);
 
-	snprintf(buffer,1024,"position%s%f%s%f%s%f%s%f%s%f",ipcDelimiter,newPosition.x,ipcDelimiter,newPosition.y,ipcDelimiter,newPosition.angle,ipcDelimiter,0.0,ipcDelimiter,0.0);
+	snprintf(buffer,1024,"position%s%f%s%f%s%f%s%f%s%f",ipcDelimiter,currentPosition.x,ipcDelimiter,currentPosition.y,ipcDelimiter,currentPosition.angle,ipcDelimiter,newPosition.x,ipcDelimiter,newPosition.y);
 	
 	ipcSend(buffer);
 	
@@ -217,6 +217,10 @@ void driveToPosition(float x, float y)
 		printf("DRIVE: %f mm\n",newPoint.radius);
 	snprintf(commandParamBuffer,255,"%f %i",newPoint.radius,1);
 	execCommands(8,commandParamBuffer);
+
+	snprintf(buffer,1024,"position%s%f%s%f%s%f%s%s%s%s",ipcDelimiter,newPosition.x,ipcDelimiter,newPosition.y,ipcDelimiter,newPosition.angle,ipcDelimiter,"none",ipcDelimiter,"none");
+	
+	ipcSend(buffer);
 }
 
 /**
@@ -243,7 +247,7 @@ void driveToAngle(float angle)
 	position.angle += driveAngle;
 	savePosition(position);
 	
-	snprintf(buffer,1024,"position%s%f%s%f%s%f%s%f%s%f",ipcDelimiter,position.x,ipcDelimiter,position.y,ipcDelimiter,position.angle,ipcDelimiter,0.0,ipcDelimiter,0.0);
+	snprintf(buffer,1024,"position%s%f%s%f%s%f%s%s",ipcDelimiter,position.x,ipcDelimiter,position.y,ipcDelimiter,position.angle,ipcDelimiter,ipcDelimiter);
 	
 	ipcSend(buffer);
 	

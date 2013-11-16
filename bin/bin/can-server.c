@@ -8,6 +8,7 @@
 #include <stdarg.h>
 #include <pthread.h>
 #include <time.h>
+#include <math.h> // log10
 
 #define PORT_WEBSOCKET 1027
 #define PORT_IPC 1028
@@ -61,7 +62,6 @@ char *generateKey(char *header)
 		key = malloc((keyLength + 1) * sizeof(char));
 		fscanf(pipe,"%s",key);
 		pclose(pipe);
-		
 		printf(" '%s'",key);
 	}
 	
@@ -81,7 +81,7 @@ void processSend(int sockfd,char *message)
 	if(strlen(message) < 126)
 	{
 		frameShift = 2;
-		buffer = malloc(((int)strlen(message) + frameShift) * sizeof(char));
+		buffer = malloc(((int)strlen(message) + frameShift + 1) * sizeof(char));
 		
 		buffer[0] = '\x81'; // 129 = text
 		buffer[1] = (char)strlen(message);
@@ -89,7 +89,7 @@ void processSend(int sockfd,char *message)
 	else if(strlen(message) > 127 && strlen(message) < 65536)
 	{
 		frameShift = 4;
-		buffer = malloc(((int)strlen(message) + frameShift) * sizeof(char));
+		buffer = malloc(((int)strlen(message) + frameShift + 1) * sizeof(char));
 		
 		buffer[0] = '\x81'; // 129 = text
 		buffer[1] = '\x7e'; // 126 = two size bytes
@@ -99,7 +99,7 @@ void processSend(int sockfd,char *message)
 	else
 	{
 		frameShift = 10;
-		buffer = malloc(((int)strlen(message) + frameShift) * sizeof(char));
+		buffer = malloc(((int)strlen(message) + frameShift + 1) * sizeof(char));
 		
 		buffer[0] = '\x81'; // 129 = text
 		buffer[1] = '\x7f'; // 127 = eight size bytes
@@ -122,6 +122,67 @@ void processSend(int sockfd,char *message)
 }
 
 /**
+ * Replace characters in string
+ * @param search			needle to search
+ * @param replace			character to replace
+ * @param subject			string to search in
+ * @return the replaced string
+**/
+void str_replace(char search,char replace,char *subject)
+{
+	int i;
+	for(i = 0; i < strlen(subject); i++)
+	{
+		if(subject[i] == '\n')
+			subject[i] = ' ';
+	}
+}
+
+/**
+ * Put the given string in front of the other string
+ * @param subject			string to be prefixed
+ * @param prefix			prefix string
+**/
+void prefix_with(char *subject,char *prefix)
+{
+	memmove(subject + strlen(prefix),subject,strlen(subject));
+	memcpy(subject,prefix,strlen(prefix));
+}
+
+void *executeCommand(void *param)
+{
+	char *msg = (char *)param;
+	int sockfd = 0;
+	char *command;
+	int i;
+	FILE *pipe;
+	char buffer[1024];
+	char prefix[] = "command|";
+
+	printf("[EXE]: Execute thread started, '%s'\n",msg);
+	sscanf(msg,"%i",&sockfd);
+	// strlen(msg) - (%i) - 1(:) + 1('\0')
+	command = malloc((strlen(msg) - ((sockfd > 0)?((int)log10((double)sockfd) + 1):(1)) - 1 + 1) * sizeof(char));
+	for(i = 0; i < (strlen(msg) - ((sockfd > 0)?((int)log10((double)sockfd) + 1):(1)) - 1 + 1); i++)
+	{
+		command[i] = msg[i + ((sockfd > 0)?((int)log10((double)sockfd) + 1):(1)) + 1];
+	}
+	command[(strlen(msg) - ((sockfd > 0)?((int)log10((double)sockfd) + 1):(1)) - 1)] = '\0';
+	pipe = popen(command,"r");
+	while(fgets(buffer,1023 - strlen(prefix),pipe))
+	{
+		str_replace('\n',' ',buffer); // replace newlines
+		prefix_with(buffer,prefix); // prefix command
+		processSend(sockfd,buffer); // send command
+		memset(buffer,0,1023); // clean command
+	}
+	pclose(pipe);
+	free(command);
+	printf("[EXE]: Execute thread done\n");
+	pthread_exit(NULL);
+}
+
+/**
  * This function processes the clients
  * @param sockfd		the socket id
  * @return status (0 = close, 1 = normal operation)
@@ -134,11 +195,12 @@ int processRead(int sockfd)
 	char buffer[1024];
 	char byte = 0;
 	char masks[4];
-	char *decoded;
 	int commandKey = 0;
 	int commandId = 0;
 	char commandParam[1024];
-	FILE *pipe;
+	char *decoded;
+	char *executeThreadParam; // workaround for empty string in thread
+	pthread_t executeThread;
 	
 	// 0.1 sec timeout for receiving
 	struct timeval tv;
@@ -171,7 +233,7 @@ int processRead(int sockfd)
 					masks[i] = buffer[frameShift + i];
 				}
 				
-				decoded = malloc((n - frameShift - 4) * sizeof(char));
+				decoded = malloc((n - frameShift - 4 + 1) * sizeof(char));
 				memset(decoded,0,(n - frameShift - 4));
 				
 				for(i = 0; i < (n - frameShift - 4); i++)
@@ -188,23 +250,18 @@ int processRead(int sockfd)
 				{
 					// generate command
 					char commandPrefix[] = "/usr/share/nginx/html/bin/can-handler - ";
-					// n -  frameShift - 4(decode) + strlen(commandPrefix) + 1(\0) + 2( &)
-					decoded = realloc(decoded,(n - frameShift - 4 + strlen(commandPrefix) + 1 + 2) * sizeof(char));
-					sprintf(decoded,"%s%i %s &",commandPrefix,commandId,commandParam);
-					printf("%s\n",decoded);
-					
-					// execute command
-					/*pipe = popen(decoded,"r");
-					while(())
-					{
-						*/
-					system(decoded);
+					// n -  frameShift - 4(decode) + strlen(commandPrefix) + 1(\0) + strlen(sockfd) + 1(:)
+					decoded = realloc(decoded,(n - frameShift - 4 + strlen(commandPrefix) + 1 + 2 + ((sockfd > 0)?((int)log10((double)sockfd) + 1):(1)) + 1) * sizeof(char));
+					sprintf(decoded,"%i:%s%i %s",sockfd,commandPrefix,commandId,commandParam);
+					executeThreadParam = malloc((n - frameShift - 4 + strlen(commandPrefix) + 1 + 2 + ((sockfd > 0)?((int)log10((double)sockfd) + 1):(1)) + 1) * sizeof(char));
+					memcpy(executeThreadParam,decoded,(n - frameShift - 4 + strlen(commandPrefix) + 1 + 2 + ((sockfd > 0)?((int)log10((double)sockfd) + 1):(1)) + 1) * sizeof(char));
+					// create thread to handle command execution
+					pthread_create(&executeThread,NULL,executeCommand,(void *)executeThreadParam);
 				}
 				else
 				{
 					fprintf(stderr,"[%3i]: Error: Global key not matched.\nNothing to do.\n",sockfd);
 				}
-				
 				free(decoded);
 			}
 			else
@@ -379,9 +436,9 @@ int main(int argc, char *argv[])
 	setbuf(stdin,NULL);
 	
 	// starting ipc server as thread
-	pthread_create(&ipcThread,NULL,ipcServer,(void *)0);
+	pthread_create(&ipcThread,NULL,ipcServer,NULL);
 	
-	printf("Starting server\n");
+	printf("[LOG]: Starting server\n");
 	
 	int yes = 1;
 	int sockfd,newsockfd,clilen;
@@ -412,7 +469,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	
-	printf("Server started on port %i\n",PORT_WEBSOCKET);
+	printf("[LOG]: Server started on port %i\n",PORT_WEBSOCKET);
 	
 	clilen = sizeof(cliaddr);
 	while(1)
@@ -422,7 +479,7 @@ int main(int argc, char *argv[])
 			fprintf(stderr,"Error: Failed to accept.\nWill exit now.\n");
 			exit(1);
 		}
-		printf("Incoming connection from %i.%i.%i.%i\n",(int)(cliaddr.sin_addr.s_addr & 0xFF),(int)((cliaddr.sin_addr.s_addr & 0xFF00) >> 8),(int)((cliaddr.sin_addr.s_addr & 0xFF0000) >> 16),(int)((cliaddr.sin_addr.s_addr & 0xFF000000) >> 24));
+		printf("[%3i]: Incoming connection from %i.%i.%i.%i\n",newsockfd,(int)(cliaddr.sin_addr.s_addr & 0xFF),(int)((cliaddr.sin_addr.s_addr & 0xFF00) >> 8),(int)((cliaddr.sin_addr.s_addr & 0xFF0000) >> 16),(int)((cliaddr.sin_addr.s_addr & 0xFF000000) >> 24));
 		pthread_create(&clientworkerThread,NULL,process,&newsockfd);
 	}
 	

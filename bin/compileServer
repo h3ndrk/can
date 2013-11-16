@@ -11,8 +11,8 @@ command="expr $counter + 1"
 echo "BUILD: "`$command`
 echo `$command` > ./build
 
-# Compile handler
-gcc -D_REENTRANT ./bin/can-server.c -Wall -o ./bin/can-server -pthread
+# Compile server
+gcc -D_REENTRANT ./bin/can-server.c -Wall -o ./bin/can-server -lpthread -lm
 
 # Change back to working directory
 cd $currentDir

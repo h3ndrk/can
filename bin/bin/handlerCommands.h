@@ -88,7 +88,7 @@ void execCommands(int commandId, char *commandParam)
 			usleep(10000);
 			break;
 		}
-		//  set fan speed <speed:0-100(percent)>
+		//  set fan speed <speed:%>
 		case 3:
 		{
 			// transmit command-ID
@@ -139,7 +139,7 @@ void execCommands(int commandId, char *commandParam)
 			}
 			break;
 		}
-		//  CALLBACK: drive motors <steps:amountOfSteps> <leftDir:0(reverse),1(forward)>
+		//  CALLBACK: drive motors <steps:amount> <leftDir:0(reverse),1(forward)>
 		// <rightDir:0(reverse),1(forward)>
 		case 5:
 		{
@@ -167,7 +167,7 @@ void execCommands(int commandId, char *commandParam)
 				printf("error\n");
 			break;
 		}
-		//  piezo beep <frequency:frequency(Hz)> <duration:duration(ms)>
+		//  piezo beep <frequency:Hz> <duration:ms>
 		case 6:
 		{
 			/* TRANSMIT COMMAND ID */
@@ -195,8 +195,8 @@ void execCommands(int commandId, char *commandParam)
 				printf("error\n");
 			break;
 		}
-		//  piezo beep test <duration:duration(ms)>
-		// <stopping:timeBetweenTone(ms)>
+		//  piezo beep test <duration:ms>
+		// <stopping:ms>
 		case 7:
 		{
 			int duration;
@@ -241,7 +241,7 @@ void execCommands(int commandId, char *commandParam)
 			execCommands(5,commandParamBuffer);
 			break;
 		}
-		//  drive from (0|0) to position <positionX:mm> <positionY:mm> and output
+		//  drive from current position to position <positionX:mm> <positionY:mm> and output
 		// real position driven (because of decimal steps)
 		case 10:
 		{
@@ -335,7 +335,7 @@ void execCommands(int commandId, char *commandParam)
 
 			// position
 			position = loadPosition();
-			snprintf(buffer,1024,"position%s%f%s%f%s%f%s%f%s%f",ipcDelimiter,position.x,ipcDelimiter,position.y,ipcDelimiter,position.angle,ipcDelimiter,0.0,ipcDelimiter,0.0);
+			snprintf(buffer,1024,"position%s%f%s%f%s%f%s%s",ipcDelimiter,position.x,ipcDelimiter,position.y,ipcDelimiter,position.angle,ipcDelimiter,ipcDelimiter);
 			
 			ipcSend(buffer);
 			

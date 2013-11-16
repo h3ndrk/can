@@ -55,6 +55,10 @@ function websocketInit()
 				robotX = parseFloat(temp[1]);
 				robotY = parseFloat(temp[2]);
 				robotAngle = parseFloat(temp[3]);
+				if(temp[4] != "")
+					robotTargetX = (temp[4] == "none")?(-1):(parseFloat(temp[4]));
+				if(temp[5] != "")
+					robotTargetY = (temp[5] == "none")?(-1):(parseFloat(temp[5]));
 				updatePosition();
 			}
 			else if(e.data.search(/cpu/gi) != -1)
@@ -64,6 +68,11 @@ function websocketInit()
 				cpuVolts = parseFloat(temp[2]);
 				cpuClock = parseInt(temp[3]);
 				updateCpu();
+			}
+			else if(e.data.search(/command/gi) != -1)
+			{
+				var temp = e.data.split(websocketDelimiter);
+				document.getElementById("debug").innerHTML = temp[1] + "<br />" + document.getElementById("debug").innerHTML;
 			}
 		};
 		websocket.onclose = function(e)
@@ -164,7 +173,20 @@ function updateHeader()
 	}
 }
 
+function sendCommand(amount)
+{
+	for(i = 0; i < amount; i++)
+	{
+		if(document.getElementById("commandsRadiobutton" + i).checked)
+		{
+			write(i,(document.getElementById("commandsInputParams").value=="")?("0"):(document.getElementById("commandsInputParams").value));
+			break;
+		}
+	}
+}
+
 function write(commandId,commandParam)
 {
+	console.log("Sending: " + websocketGlobalKey + ":" + commandId + ":" + commandParam + "");
 	websocket.send(websocketGlobalKey + ":" + commandId + ":" + commandParam);
 }<?php } ?>

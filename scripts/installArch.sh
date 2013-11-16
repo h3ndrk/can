@@ -541,7 +541,8 @@ chmod 0755 /root/can-wlan-setup
 # CREATE AND ENABLE AUTOSTART SCRIPT
 echo '#!/bin/bash
 
-/root/can-wlan-setup' > /root/can-autostart
+/root/can-wlan-setup
+/usr/share/nginx/html/bin/can-handler - 2 0' > /root/can-autostart
 
 chmod 0755 /root/can-autostart
 
@@ -555,9 +556,20 @@ ExecStart=/root/can-autostart
 [Install]
 WantedBy=multi-user.target' > /etc/systemd/system/robotercan.service
 
-chmod 0755 /etc/systemd/system/robotercan.service
+echo '[Unit]
+Description=Roboter CAN server autostart script
 
-systemctl enable robotercan.service
+[Service]
+Type=idle
+ExecStart=/usr/share/nginx/html/bin/can-server
+
+[Install]
+WantedBy=multi-user.target' > /etc/systemd/system/robotercanServer.service
+
+chmod 0755 /etc/systemd/system/robotercan.service
+chmod 0755 /etc/systemd/system/robotercanServer.service
+
+systemctl enable robotercan.service robotercanServer.service
 
 # INSTALL WEBSERVER
 pacman -S nginx php-fpm --noconfirm

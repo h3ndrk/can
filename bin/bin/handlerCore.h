@@ -205,36 +205,42 @@ void dataBusReset(void)
 	digitalWrite(18,1);
 }
 
+/**
+ * Send message to IPC-Server-Socket on 127.0.0.1:1028
+ * @param mes			message to send
+**/
 void ipcSend(char *msg)
 {
 	int sockfd;
 	struct sockaddr_in servaddr;
-
+	
 	// wait for server
 	usleep(100000);
 	
 	if((sockfd = socket(AF_INET,SOCK_STREAM,0)) < 0)
 	{
-		fprintf(stderr,"Failed to create socket.\nWill exit now.\n");
-		exit(1);
+		fprintf(stderr,"Failed to create socket.\n");
 	}
-	
-	servaddr.sin_family = AF_INET;
-	servaddr.sin_port = htons(1028);
-	
-	if(inet_pton(AF_INET,"127.0.0.1",&servaddr.sin_addr) <= 0)
+	else
 	{
-		fprintf(stderr,"Failed to set server address.\nWill exit now.\n");
-		exit(1);
+		servaddr.sin_family = AF_INET;
+		servaddr.sin_port = htons(1028);
+		
+		if(inet_pton(AF_INET,"127.0.0.1",&servaddr.sin_addr) <= 0)
+		{
+			fprintf(stderr,"Failed to set server address.\n");
+		}
+		else
+		{
+			if(connect(sockfd,(struct sockaddr *)&servaddr,sizeof(servaddr)) < 0)
+			{
+				fprintf(stderr,"Failed to connect. Perhaps you should start the server?\n");
+			}
+			else
+			{
+				write(sockfd,msg,(int)strlen(msg));
+				close(sockfd);
+			}
+		}
 	}
-	
-	if(connect(sockfd,(struct sockaddr *)&servaddr,sizeof(servaddr)) < 0)
-	{
-		fprintf(stderr,"Failed to connect.\nWill exit now.\n");
-		exit(1);
-	}
-	
-	write(sockfd,msg,(int)strlen(msg));
-	
-	close(sockfd);
 }

@@ -106,7 +106,7 @@ function zoomHandler(e)
 function keyDown(e)
 {
 	var keycode = e.which?e.which:e.keyCode;
-	if(keycode == 82)
+	if(!dragDropDisable && keycode == 82)
 	{
 		debugPointVisibility = !debugPointVisibility;
 		console.info("Debug point is now " + ((debugPointVisibility)?("visible"):("hidden")));
@@ -194,7 +194,7 @@ function dragDropUp(e)
 	dragDropLastY = -1;
 	dragDropStarted = false;
 	clearInterval(dragDropInterval);
-	canvas.style.cursor = "default";
+	canvas.style.cursor = "crosshair";
 	
 	// click
 	/*if((e.pageX - dragDropStartX) == 0 && (e.pageY - dragDropStartY) == 0)
@@ -284,8 +284,8 @@ function canvasDraw()
 		
 		// axes-description
 		ctx.font = "15px Arial,sans,sans-serif";
-		ctx.fillText("x",convertPointToPixelX(0) + 10,12);
-		ctx.fillText("y",canvas.width - 10,convertPointToPixelY(0) + 20);
+		ctx.fillText("x",canvas.width - 10,convertPointToPixelY(0) + 20);
+		ctx.fillText("y",convertPointToPixelX(0) + 10,12);
 		
 		// draw robot direction pointer
 		if(websocketConnected && (robotX > (viewX + (viewZoomX / 2)) || robotX < (viewX - (viewZoomX / 2)) || robotY > (viewY + (viewZoomY / 2)) || robotY < (viewY - (viewZoomY / 2))))

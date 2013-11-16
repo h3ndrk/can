@@ -2,7 +2,7 @@
 	session_start();
 	if(isset($_GET["login"]) && empty($_SESSION["loggedIn"]) && !empty($_POST["key"]))
 	{
-		if(md5(htmlspecialchars($_POST["key"])) == "2332229a2f3e5a72f7a5863bfe8d07bf")
+		if(md5(htmlspecialchars($_POST["key"])) == "2332229a2f3e5a72f7a5863bfe8d07bf" || md5(htmlspecialchars($_POST["key"])) == "3e3fbdc73972052786ecf472b08ddfac")
 		{
 			$_SESSION["loggedIn"] = 1;
 			header("Location: .");
@@ -76,7 +76,7 @@
 			#box
 			{
 				position: absolute;
-				background-color: #FFFFFF;
+				background-color: rgba(255,255,255,0.9);
 				width: 300px;
 				top: 0;
 				bottom: 0;
@@ -104,6 +104,12 @@
 				color: #444444;
 				background-color: #F2F2F2;
 				box-shadow: inset 0 1px 1px rgba(0,0,0,0.125);
+			}
+			#box .boxLineSmall
+			{
+				background-color: #EEEEEE;
+				height: 1px;
+				margin: 10px 0;
 			}
 			#box .boxContent
 			{
@@ -136,9 +142,58 @@
 			{
 				background-color: #EEEEEE;
 			}
+			#box label
+			{
+				color: #888888;
+				font-size: 12px;
+			}
+			#box input[type="text"]
+			{
+				background-color: #F8F8F8;
+				box-shadow: inset 0 1px 1px rgba(0,0,0,0.125);
+				border: none;
+				border-radius: 2px;
+				padding: 7px 12px;
+				font-family: Arial, sans, sans-serif;
+				font-size: 13px;
+				display: block;
+				width: 222px;
+				margin: 10px 0 10px 0;
+			}
+			#debug
+			{
+				position: absolute;
+				top: 10px;
+				right: 10px;
+				border-radius: 3px;
+				max-height: 50px;
+				width: 300px;
+				padding: 5px;
+				background-color: rgba(255,255,255,0.9);
+				overflow: hidden;
+				box-shadow: 0 1px 2px rgba(0,0,0,0.125), 0 2px 7px rgba(0,0,0,0.125), 0 3px 15px rgba(0,0,0,0.125), 0 5px 25px rgba(0,0,0,0.125), 0 10px 30px rgba(0,0,0,0.125), 0 25px 75px rgba(0,0,0,0.125);
+				opacity: 0.5;
+				-moz-transition: all 0.25s ease-out;
+				-webkit-transition: all 0.25s ease-out;
+				-o-transition: all 0.25s ease-out;
+				-ms-transition: all 0.25s ease-out;
+				transition: all 0.25s ease-out;
+			}
+			#debug:hover
+			{
+				max-height: 250px;
+				opacity: 1;
+			}
+			canvas
+			{
+				cursor: crosshair;
+				margin: 0;
+				padding: 0;
+			}
 		</style>
 	</head>
 	<body onload="canvasInit();websocketInit();">
+		<div id="debug"></div>
 		<div id="header">
 			<table>
 				<tr>
@@ -168,6 +223,26 @@
 				Robot target X: <span id="robotTargetX">?</span><span> mm</span><br />
 				Robot target Y: <span id="robotTargetY">?</span><span> mm</span>
 			</div>
+			<div class="boxLine">Commands</div>
+			<div class="boxContent">
+				<?php
+					$commands = explode("//  ",file_get_contents('/usr/share/nginx/html/bin/handlerCommands.h'));
+					for($i = 0; $i < count($commands); $i++)
+					{
+						$commands[$i] = explode('case',$commands[$i]);
+					}
+					for($i = 0; $i < count($commands); $i++)
+					{
+						$commands[$i] = str_replace(array("\n","\t","//"),"",$commands[$i][0]);
+					}
+					array_splice($commands,0,1);
+					for($i = 0; $i < count($commands); $i++)
+					{
+						echo '<input onClick=\'document.getElementById("commandsInputParams").value="";\' style="margin: 0 7px 0 0;" id="commandsRadiobutton' . $i . '" type="radio" name="commandId" value="' . $i . '" /><label onClick=\'document.getElementById("commandsInputParams").value="";\' for="commandsRadiobutton' . $i . '">' . $i . ': ' . str_replace(array("<",">"),array('&lt;','&gt;'),$commands[$i]) . '</label><br />';
+					}
+					echo '<input type="text" placeholder="Command parameters..." id="commandsInputParams" /><br /><button onClick="sendCommand(' . count($commands) . ');">Execute command</button>';
+				?>
+			</div>
 			<div class="boxLine">CPU</div>
 			<div class="boxContent">
 				Temperature: <span id="cpuTemp">?</span><span> &deg;C</span><br />
@@ -175,7 +250,7 @@
 				Clock: <span id="cpuClock">?</span><span> MHz</span>
 			</div>
 		</div>
-		<canvas style="cursor: default; margin: 0; padding: 0;" height="947" width="1680" id="canvas"></canvas>
+		<canvas height="947" width="1680" id="canvas"></canvas>
 	</body>
 </html><?php } else { ?><!DOCTYPE html>
 <html>
@@ -250,6 +325,10 @@
 				font-size: 15px;
 				color: #444444;
 			}
+			div#login input[type="submit"]:hover
+			{
+				background-color: #EEEEEE;
+			}
 			div#login h2
 			{
 				font-size: 13px;
@@ -274,7 +353,7 @@
 			<?php if(!isset($_GET["error"])) { ?><h1>Roboter CAN</h1><?php } else { ?><h1 style="color: #AA0000;">Access denied</h1><?php } ?>
 			<form action="?login" method="post">
 				<input type="password" name="key" placeholder="Access-Key" autofocus />
-				<input type="submit" value="Anmelden" />
+				<input type="submit" value="Login" />
 			</form>
 			<h2>&copy; 2013 by Hendrik Sieck, NIPE-SYSTEMS.de<br />Team Partyzone Glinde</h2>
 		</div></div>
