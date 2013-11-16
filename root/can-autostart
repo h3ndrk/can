@@ -1,3 +1,4 @@
 #!/bin/bash
 
 /root/can-wlan-setup
+/usr/share/nginx/html/bin/can-handler - 2 0

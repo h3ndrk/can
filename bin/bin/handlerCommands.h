@@ -348,11 +348,64 @@ void execCommands(int commandId, char *commandParam)
 			ipcSend(buffer);
 			break;
 		}
+		//  Update CPU and fan values
+		case 15:
+		{
+			FILE *cpuFile;
+			FILE *fanFile;
+			FILE *pipe;
+			const int tempLow = 37;
+			const int tempHigh = 43;
+			float cpuTemp;
+			float cpuVolts;
+			long cpuClock;
+			int newFanSpeed;
+			int oldFanSpeed;
+			if((cpuFile = fopen("/usr/share/nginx/html/bin/values/cpu","w")) != NULL)
+			{
+				pipe = popen("/opt/vc/bin/vcgencmd measure_temp | cut -d '=' -f2 | sed 's/..$//'","r");
+				fscanf(pipe,"%f",&cpuTemp);
+				pclose(pipe);
+				pipe = popen("/opt/vc/bin/vcgencmd measure_volts core | cut -d '=' -f2 | sed 's/.$//'","r");
+				fscanf(pipe,"%f",&cpuVolts);
+				pclose(pipe);
+				pipe = popen("/opt/vc/bin/vcgencmd measure_clock arm | cut -d '=' -f2","r");
+				fscanf(pipe,"%li",&cpuClock);
+				pclose(pipe);
+				printf("CPU temperatur: %f\nCPU volts:      %f\nCPU clock:      %li\n",cpuTemp,cpuVolts,cpuClock);
+				fprintf(cpuFile,"%f %f %li",cpuTemp,cpuVolts,cpuClock);
+				fclose(cpuFile);
+				if((fanFile = fopen("/usr/share/nginx/html/bin/values/fan","r")) != NULL)
+				{
+					fscanf(fanFile,"%i %i",&oldFanSpeed,&newFanSpeed);
+					fclose(fanFile);
+					if((fanFile = fopen("/usr/share/nginx/html/bin/values/fan","w")) != NULL)
+					{
+						if(cpuTemp < 37.0) // temperature too low
+						{
+							newFanSpeed = 0;
+						}
+						else if(cpuTemp > 43.0) // temperature too high
+						{
+							newFanSpeed = 100;
+						}
+						else // temperature in range
+						{
+							newFanSpeed = (((cpuTemp - tempLow) / (float)(tempHigh - tempLow)) * 100.0);
+						}
+						printf("OLD fan speed:  %i\nNEW fan speed:  %i\n",oldFanSpeed,newFanSpeed);
+						fprintf(fanFile,"%i %i",oldFanSpeed,newFanSpeed);
+						fclose(fanFile);
+					}
+				}
+			}
+			break;
+		}
 		// if the users inputs a command-ID which is not supported output:
 		// "no such command"
 		default:
 		{
-			printf("%i:%s: %sno such command%s\n",commandId,commandParam,red,reset);
+			printf("%i:%s: no such command\n",commandId,commandParam);
 			break;
 		}
 	}

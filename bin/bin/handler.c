@@ -3,10 +3,10 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
-#include <time.h>        // sensor image filename
-#include <math.h>        // sensor image filename
-#include <wiringPi.h>    // wiringPi
-#include <jpeglib.h>     // libjpeg
+#include <time.h> // sensor image filename
+#include <math.h> // sensor image filename
+#include <wiringPi.h> // wiringPi
+#include <jpeglib.h> // libjpeg
 #include <sys/socket.h> // IPC-Socket
 #include <sys/types.h> // IPC-Socket
 #include <netdb.h> // IPC-Socket
@@ -16,13 +16,8 @@
 // DEBUG = 0 = no debug messages at stdout, DEBUG = 1 = debug messages at stdout
 int DEBUG = 0;
 
-// terminal colors
-char red[] = "\x1b[31m";
-char green[] = "\x1b[32m";
-char reset[] = "\x1b[0m";
 char ipcDelimiter[] = "|";
 
-#include "globals.h"
 #include "handlerCore.h"
 #include "handlerDrivingHeader.h"
 #include "handlerImageRecognition.h"
@@ -77,49 +72,31 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	
-	// if handler isnt locked try to lock
-	/*if(DEBUG == 1)
-		printf("Set command lock...");
-	if(!fileExists(LOCK_COMMANDS_FILE))
+	if(commandId != 15) // do not allow the fan control to access the databus
 	{
-		FILE *lockFileTemp;
-		lockFileTemp = fopen(LOCK_COMMANDS_FILE,"w");
-		if(lockFileTemp != NULL)
+		FILE *fanFile;
+		if((fanFile = fopen("/usr/share/nginx/html/bin/values/fan","r")) != NULL)
 		{
-			if(DEBUG == 1)
-				printf(" [ %sOK%s ]\n",green,reset);
-			fclose(lockFileTemp);
-		}
-		else
-		{
-			if(DEBUG == 1)
-				printf(" [%sFAIL%s]\n",red,reset);
+			int oldFanSpeed, newFanSpeed;
+			fscanf(fanFile,"%i %i",&oldFanSpeed,&newFanSpeed);
+			fclose(fanFile);
+			if(oldFanSpeed != newFanSpeed)
+			{
+				char *fanParam = malloc((((newFanSpeed > 0)?((int)log10((double)newFanSpeed) + 1):(1)) + 1) * sizeof(char));
+				sprintf(fanParam,"%i",newFanSpeed);
+				if((fanFile = fopen("/usr/share/nginx/html/bin/values/fan","w")) != NULL)
+				{
+					fprintf(fanFile,"%i %i",newFanSpeed,newFanSpeed);
+					fclose(fanFile);
+				}
+				execCommands(3,fanParam);
+				free(fanParam);
+			}
 		}
 	}
-	else
-	{
-		if(DEBUG == 1)
-			printf(" [%sFAIL%s]\n",red,reset);
-		printf("locked\n");
-		exit(0);
-	}*/
 	
 	// execute the given command
 	execCommands(commandId,commandParam);
-	
-	// remove command lock
-	/*if(DEBUG == 1)
-		printf("Remove command lock...");
-	if(remove(LOCK_COMMANDS_FILE) != 0)
-	{
-		if(DEBUG == 1)
-			printf(" [%sFAIL%s]\n",red,reset);
-	}
-	else
-	{
-		if(DEBUG == 1)
-			printf(" [ %sOK%s ]\n",green,reset);
-	}*/
 	
 	if(DEBUG)
 		printf("Finished. Thank you.\n");

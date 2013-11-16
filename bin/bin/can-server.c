@@ -172,6 +172,8 @@ void *executeCommand(void *param)
 	while(fgets(buffer,1023 - strlen(prefix),pipe))
 	{
 		str_replace('\n',' ',buffer); // replace newlines
+		str_replace('\r',' ',buffer); // replace carriage returns
+		str_replace('\t',' ',buffer); // replace tabs
 		prefix_with(buffer,prefix); // prefix command
 		processSend(sockfd,buffer); // send command
 		memset(buffer,0,1023); // clean command

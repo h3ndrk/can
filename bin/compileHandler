@@ -11,9 +11,6 @@ command="expr $counter + 1"
 echo "BUILD: "`$command`
 echo `$command` > ./build
 
-# Setting up global variables
-./configure
-
 # Compile handler
 gcc -D_REENTRANT ./bin/handler.c -Wall -o ./bin/can-handler -D _BSD_SOURCE -lwiringPi -lm -ljpeg
 

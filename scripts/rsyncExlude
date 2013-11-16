@@ -2,5 +2,6 @@ build
 bin/globals.h
 bin/values/cpu
 bin/values/position
+bin/values/fan
 bin/can-handler
 bin/can-server

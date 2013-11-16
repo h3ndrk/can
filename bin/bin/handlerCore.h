@@ -244,3 +244,20 @@ void ipcSend(char *msg)
 		}
 	}
 }
+
+/**
+ * Replace characters in string
+ * @param search			needle to search
+ * @param replace			character to replace
+ * @param subject			string to search in
+ * @return the replaced string
+**/
+void str_replace(char search,char replace,char *subject)
+{
+	int i;
+	for(i = 0; i < strlen(subject); i++)
+	{
+		if(subject[i] == '\n')
+			subject[i] = ' ';
+	}
+}

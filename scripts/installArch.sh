@@ -1002,7 +1002,7 @@ SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 # m h dom mon dow user	command
-* * * * * root php -f /usr/share/nginx/html/bin/can-temp-refresh.php' > /etc/cron.d/1temp
+* * * * * root php -f /usr/share/nginx/html/bin/can-handler - 15 0' > /etc/cron.d/1temp
 
 # PRINT OUT RECOMMENDED ACTIONS
 echo "
