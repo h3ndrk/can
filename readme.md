@@ -1,6 +1,6 @@
-<h1 align="center">
-  ![Roboter CAN](http://nipe-systems.de/blog/edit/upload/d6a2687a7db7a3885e53e664be03765b "Roboter CAN")
-</h1>
+# Roboter CAN
+
+![Roboter CAN](http://nipe-systems.de/blog/edit/upload/d6a2687a7db7a3885e53e664be03765b "Roboter CAN")
 
 ## What is Roboter CAN?
 
