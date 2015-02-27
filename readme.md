@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img alt="Roboter CAN" src="http://nipe-systems.de/blog/edit/upload/d6a2687a7db7a3885e53e664be03765b" />
+  ![Roboter CAN](http://nipe-systems.de/blog/edit/upload/d6a2687a7db7a3885e53e664be03765b "Roboter CAN")
 </h1>
 
 ## What is Roboter CAN?
