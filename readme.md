@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img alt="Roboter CAN" src="http://nipe-systems.de/edit/upload/d6a2687a7db7a3885e53e664be03765b" />
+  <img alt="Roboter CAN" src="http://nipe-systems.de/blog/edit/upload/d6a2687a7db7a3885e53e664be03765b" />
 </h1>
 
 ## What is Roboter CAN?
